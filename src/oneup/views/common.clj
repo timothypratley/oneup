@@ -6,13 +6,14 @@
 (defpartial layout [& content]
              (html
                (doctype :html5)
-               "<html ng-app>"
+               [:html.ng-app
                [:head
                 [:title "oneup"]
                 (include-css "/css/reset.css")
                 (include-css "/css/bootstrap.min.css")
-                (include-js "http://code.angularjs.org/angular-1.0.1.min.js")]
-               [:body
+                (include-js "http://code.angularjs.org/angular-1.0.1.min.js")
+                (include-js "/js/controllers.js")]
+               [:body {:ng-controller "ForumController"}
                 [:header.navbar.navbar-fixed-top
                  [:div.navbar-inner
                   [:div.container {:style "width:85%"}
@@ -23,5 +24,4 @@
                     [:span.icon-bar]]
                    [:a.brand {:href "/"}
                     [:strong "oneup"]]]]]
-                content])
-               "</html>")
+                content]]))
