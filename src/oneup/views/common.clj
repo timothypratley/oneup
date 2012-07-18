@@ -4,24 +4,20 @@
         [hiccup.core]))
 
 (defpartial layout [& content]
-             (html
-               (doctype :html5)
-               [:html.ng-app
+            (html
+              (doctype :html5)
+              [:html.ng-app
                [:head
                 [:title "oneup"]
                 (include-css "/css/reset.css")
                 (include-css "/css/bootstrap.min.css")
+                (include-css "/css/oneup.css")
                 (include-js "http://code.angularjs.org/angular-1.0.1.min.js")
                 (include-js "/js/controllers.js")]
-               [:body {:ng-controller "ForumController"}
+               [:body
                 [:header.navbar.navbar-fixed-top
                  [:div.navbar-inner
                   [:div.container {:style "width:85%"}
-                   [:a.btn.btn-navbar {:data-toggle "collapse"
-                                       :data-target ".nav-collapse"}
-                    [:span.icon-bar [:i]]
-                    [:span.icon-bar]
-                    [:span.icon-bar]]
                    [:a.brand {:href "/"}
                     [:strong "oneup"]]]]]
                 content]]))

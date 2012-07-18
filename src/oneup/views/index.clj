@@ -6,12 +6,11 @@
 
 (defpage "/" []
          (common/layout
-           [:br] [:br] [:br]
            "Your name:" [:input {:type "text"
                                  :ng-model "yourname"
                                  :placeholder "World"}]
            [:p "Hello {{yourname || 'World'}}"]
-           [:ul
+           [:ul {:ng-controller "ForumController"}
             [:li {:ng-repeat "post in posts"}
              "{{post.date}}{{post.author}}{{post.title}}"]]))
 
@@ -27,4 +26,4 @@
                  :date "20120716"}]))
 
 (defpage [:get "/forum/:id"] attrs 
-  (json {:attrs attrs}))
+         (json {:attrs attrs}))
