@@ -13,6 +13,7 @@
                 (include-css "/css/bootstrap.min.css")
                 (include-css "/css/oneup.css")
                 (include-js "http://code.angularjs.org/angular-1.0.1.min.js")
+                (include-js "/js/services.js")
                 (include-js "/js/controllers.js")]
                [:body
                 [:header.navbar.navbar-fixed-top

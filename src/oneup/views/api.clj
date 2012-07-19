@@ -1,14 +1,11 @@
-(ns oneup.views.welcome
+(ns oneup.views.api
   (:require [oneup.views.common :as common])
   (:use [noir.core]
         [noir.response :only [json]]
         [hiccup.core :only [html]]))
 
-(defpage "/vote" []
+(defpage [:post "/vote"] []
          (json ))
 
-(defpage "/propose" []
-         (json ))
-
-(defpage "/vote" []
+(defpage [:post "/propose"] []
          (json ))
