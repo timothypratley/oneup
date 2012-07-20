@@ -6,19 +6,21 @@
 (defpartial layout [& content]
             (html
               (doctype :html5)
-              [:html.ng-app
+              [:html {:ng-app "oneup"}
                [:head
                 [:title "oneup"]
                 (include-css "/css/reset.css")
                 (include-css "/css/bootstrap.min.css")
-                (include-css "/css/oneup.css")
-                (include-js "http://code.angularjs.org/angular-1.0.1.min.js")
-                (include-js "/js/services.js")
-                (include-js "/js/controllers.js")]
+                (include-css "/css/oneup.css")]
                [:body
                 [:header.navbar.navbar-fixed-top
                  [:div.navbar-inner
                   [:div.container {:style "width:85%"}
                    [:a.brand {:href "/"}
                     [:strong "oneup"]]]]]
-                content]]))
+                content
+                (include-js "/js/angular-1.0.1.min.js")
+                (include-js "/js/angular-resource-1.0.1.min.js")
+                (include-js "/js/services.js")
+                (include-js "/js/controllers.js")
+                (include-js "/js/oneup.js")]]))
