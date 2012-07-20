@@ -4,19 +4,17 @@ function ForumController($scope, $http) {
   });
 }
 
-function ProposalController($scope, Propose) {
-  $scope.gold1 = 2;                                   
-  $scope.gold2 = 2;                                   
-  $scope.gold3 = 2;                                   
-  $scope.gold4 = 2;                                   
-  $scope.gold5 = 2;         
+function ProposalController($scope, Propose, $log) {
+  $scope.gold = [2,2,2,2,2];
+  $scope.total = function() {
+    var tt=0;
+    for(var ii in $scope.gold) { tt += $scope.gold[ii]; }
+    return tt;
+  };
   $scope.submit = function() {
-    new Propose().$create({
-      gold1: $scope.gold1,
-      gold2: $scope.gold2,
-      gold3: $scope.gold3,
-      gold4: $scope.gold4,
-      gold5: $scope.gold5});
+    var p = new Propose();
+    p.$create($scope.gold);
+    $log.info(p);
   };                          
 }
 

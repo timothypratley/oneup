@@ -29,30 +29,33 @@
 (defpage "/forum/:id" attrs 
          (json {:attrs attrs}))
 
-(defn gold-field [name]
-  (text-field {:ng-model name
-               :type "number"
-               :min 0
-               :max 10
-               :required true
-               :ng-validate "integer"} (str "input-" name)))
+(defn gold-field [number]
+  (let [name (str "gold" number)]
+    [:p (text-field {:ng-model (str "gold[" number "]")
+                     :type "number"
+                     :min 0
+                     :max 10
+                     :required true
+                     :integer true}
+                     name)
+     [:span.error {:ng-show (str "myForm." name ".$invalid")} (str "{{myForm." name ".$error}}")]]))
 
 (defpage "/propose" []
          (common/layout
            [:p "How should the gold be divided?"]
-           [:form {:name "myForm"
-                   :ng-submit "submit()"
-                   :ng-controller "ProposalController"}
-            (gold-field "gold1")
-            (gold-field "gold2")
-            (gold-field "gold3")
-            (gold-field "gold4")
-            (gold-field "gold5")
+           [:form.css-form {:name "myForm"
+                            :ng-controller "ProposalController"
+                            :novalidate true
+                            :ng-submit "submit()"}
+            (gold-field 0)
+            (gold-field 1)
+            (gold-field 2)
+            (gold-field 3)
+            (gold-field 4)
+            (label "total" "Total: {{total()}}")
             [:br]
             [:span.error {:ng-show "myForm.$invalid"} "{{myForm.$error}}"]
             [:br]
-            (submit-button {
-                            :id "submit"
-                            ;:disabled "myForm.$invalid"
-                            }
-              "Propose")]))
+            (submit-button {:id "submit"
+                            :ng-disabled "myForm.$invalid || total() != 10"}
+                           "Propose")]))
