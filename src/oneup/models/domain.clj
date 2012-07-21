@@ -1,12 +1,34 @@
-(ns oneup.domain)
+(ns oneup.models.domain)
 
 (def pirates (ref {}))
 (def proposals (ref {}))
 (def votes (ref {}))
 
+
+; TODO: ugly?
+(def raise-event)
+
+; command validation
+(defn gold? [g]
+  (and (integer? g) (<= 0 g 10)))
+(defn add-proposal-command[v]
+  (cond
+    (not (= 5 (count v))) "an array of five integers"
+    (not (every? gold? v)) "integers from 0 to 10"
+    (not (= 10 (reduce + v))) "sum to 10"
+    :else (raise-event v)))
+
+(defn apply-event [v])
+
+(defn store-event [event])
+  
+(defn publish-event [event]
+  "success")
+  
+; event handling
 (defn raise-event [event]
   (store-event event)
-  (event-handler event)
+  (apply-event event)
   (publish-event event))
 
 (defn add-pirate [pirate]
@@ -17,6 +39,10 @@
   (dosync
     (if (not (@pirates (:name pirate)))
       (raise-event pirate))))
+
+; TODO
+(def next-proposal-id)
+(def next-vote-id)
 
 (defn add-proposal [proposal]
   (dosync (alter proposals assoc (next-proposal-id) proposal)))

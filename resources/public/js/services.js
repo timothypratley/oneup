@@ -26,16 +26,6 @@ angular.module('oneup.service', ['ngResource'])
       return promise.then(success, error);
     }
   })
-  .factory('Propose', function($resource) {
-    return $resource('/propose', {}, {
-      create: {method: 'POST'}
-    });
-  })
-  .factory('Vote', function($resource) {
-    return $resource('/vote', {}, {
-      create: {method: 'POST'}
-    });
-  })
   .directive('integer', function() {
     return {
       require: 'ngModel',

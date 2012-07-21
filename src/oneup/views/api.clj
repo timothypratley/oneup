@@ -2,20 +2,13 @@
   (:require [oneup.views.common :as common])
   (:use [noir.core]
         [noir.response :only [json]]
-        [hiccup.core :only [html]]))
+        [oneup.models.domain]))
 
 (defpage [:post "/vote"] []
          (json ))
-
-(defn gold? [g]
-  (and (integer? g) (<= 0 g 10)))
-  
-(defpage [:post "/propose"] v
+ 
+;TODO why can't I use {keys [a b c d e]}?
+(defpage [:post "/propose/:a/:b/:c/:d/:e"] {a :a b :b c :c d :d e :e}
          (println "hi")
-         (println v)
-         (cond
-           (nil? v) "No gold sent"
-           (not (vector? v)) "Send me an array please"
-           (not (every? gold? v)) "Integers 0-10 only please"
-           (not (= 10 (reduce + v))) "Must sum to 10"
-           :else "Success!"))
+         (println a b c d e)
+         (add-proposal-command (map #(Integer/parseInt %) [a b c d e])))
