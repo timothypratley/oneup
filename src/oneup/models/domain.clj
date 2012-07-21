@@ -4,20 +4,6 @@
 (def proposals (ref {}))
 (def votes (ref {}))
 
-
-; TODO: ugly?
-(def raise-event)
-
-; command validation
-(defn gold? [g]
-  (and (integer? g) (<= 0 g 10)))
-(defn add-proposal-command[v]
-  (cond
-    (not (= 5 (count v))) "an array of five integers"
-    (not (every? gold? v)) "integers from 0 to 10"
-    (not (= 10 (reduce + v))) "sum to 10"
-    :else (raise-event v)))
-
 (defn apply-event [v])
 
 (defn store-event [event])
@@ -48,8 +34,19 @@
   (dosync (alter proposals assoc (next-proposal-id) proposal)))
 (defn event-handler [proposal]
   (add-proposal proposal))
+(defn gold? [g]
+  (and (integer? g) (<= 0 g 10)))
+(defn add-proposal-command[v]
+  (cond
+    (not (= 5 (count v))) "an array of five integers"
+    (not (every? gold? v)) "integers from 0 to 10"
+    (not (= 10 (reduce + v))) "sum to 10"
+    :else (raise-event v)))
 
 (defn add-vote [vote]
   (dosync (alter votes assoc (next-vote-id) vote)))
 (defn event-handler [vote]
   (add-vote vote))
+(defn add-vote-command [b]
+  (raise-event b))
+    
