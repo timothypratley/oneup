@@ -18,6 +18,10 @@ function ProposalController($scope, $http, $log) {
   };                          
 }
 
-function VoteController($scope) {
-                                 
+function VoteController($scope, $http, $log) {
+  $scope.submit = function(vote) {
+    $http.post('/vote/' + vote)
+      .success($log.info)
+      .error($log.error);
+  }
 }

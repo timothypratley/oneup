@@ -1,12 +1,12 @@
 (ns oneup.views.index
-  (:require [oneup.views.common :as common])
-  (:use [noir.core]
+  (:use [oneup.views.common]
+        [noir.core]
         [noir.response :only [json]]
         [hiccup.core]
         [hiccup.form-helpers]))
 
 (defpage "/" []
-         (common/layout
+         (layout
            "Your name:" [:input {:type "text"
                                  :ng-model "yourname"
                                  :placeholder "World"}]
@@ -41,12 +41,12 @@
      [:span.error {:ng-show (str "myForm." name ".$invalid")} (str "{{myForm." name ".$error}}")]]))
 
 (defpage "/propose" []
-         (common/layout
+         (layout
            [:p "How should the gold be divided?"]
            [:form.css-form {:name "myForm"
                             :ng-controller "ProposalController"
-                            :novalidate true
-                            :ng-submit "submit()"}
+                            :ng-submit "submit()"
+                            :novalidate true}
             (gold-field 0)
             (gold-field 1)
             (gold-field 2)
@@ -59,3 +59,12 @@
             (submit-button {:id "submit"
                             :ng-disabled "myForm.$invalid || total() != 10"}
                            "Propose")]))
+
+(defpage "/vote" []
+         (layout
+           [:p "Do you accept the proposal?"]
+           [:form.css-form {:name "myForm"
+                            :ng-controller "VoteController"
+                            :novalidate true}
+            (submit-button {:ng-click "submit('yes')"} "Aye!")
+            (submit-button {:ng-click "submit('no')"} "Avast!")]))
