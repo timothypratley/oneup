@@ -1,4 +1,4 @@
-(ns oneup.views.api
+(ns oneup.views.commands
   (:require [oneup.views.common :as common])
   (:use [noir.core]
         [noir.validation]
