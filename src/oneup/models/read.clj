@@ -28,6 +28,7 @@
   (dosync
     ;(alter proposals
            ;assoc (proposal :id) proposal)
+    (println proposal)
     (alter proposal-statistics
            update-in [(proposal :gold)] ninc)
     (update-pirate [(first (:pirates proposal))] made proposal)))

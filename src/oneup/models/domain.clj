@@ -19,14 +19,15 @@
   (accept event)
   (publish event))
 
-(defmethod accept :add-pirate [pirate]
-  (alter pirates assoc (:name pirate) (:joined pirate)))
+(defmethod accept :add-pirate [add-pirate]
+  (alter pirates
+         assoc (:name add-pirate) (:pirate add-pirate)))
 (defn add-pirate-command [pirate]
   (dosync
     (if (not (@pirates (:name pirate)))
       (raise {:type :add-pirate
               :name pirate
-              :joined (java.util.Date.)}))))
+              :pirate {:joined (java.util.Date.)}}))))
 
 (let [last-id (ref 0)]
   (defn next-id []
@@ -34,8 +35,9 @@
       (alter last-id inc))))
 
 (defmethod accept :add-proposal [proposal]
-  (alter proposals
-         assoc (next-id) proposal))
+  (let [id (next-id)]
+    (alter proposals
+           assoc id (assoc (dissoc proposal :type) :id id))))
 (defn gold? [g]
   (and (integer? g) (<= 0 g 10)))
 (defn add-proposal-command[pirate gold]

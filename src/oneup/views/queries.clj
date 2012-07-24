@@ -1,9 +1,9 @@
 (ns oneup.views.queries
-  (:require [oneup.views.common :as common])
-  (:use [noir.core]
+  (:use [oneup.views.common]
+        [oneup.models.read]
+        [noir.core]
         [noir.validation]
-        [noir.response :only [json]]
-        [oneup.models.read]))
+        [noir.response :only [json]]))
 
 (defpage "/leaderboard" []
          (println "leaderboard")
@@ -11,8 +11,10 @@
 
 (defpage "/pirate/:name" {:keys [name]}
          (println "pirate:" name)
-         (@pirate-summary name))
+         (layout
+           (@pirate-summaries name)))
 
 (defpage "/stats/:a/:b/:c/:d/:e" {:keys [a b c d e]}
          (println "stats:" [a b c d e])
-         (@proposal-statistics [a b c d e]))
+         (layout
+           (@proposal-statistics [a b c d e])))
