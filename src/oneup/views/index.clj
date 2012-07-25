@@ -63,8 +63,14 @@
 (defpage "/vote" []
          (layout
            [:p "Do you accept the proposal?"]
-           [:form.css-form {:name "myForm"
-                            :ng-controller "VoteController"
+           [:form.css-form {:ng-controller "VoteController"
                             :novalidate true}
             (submit-button {:ng-click "submit('yes')"} "Aye!")
             (submit-button {:ng-click "submit('no')"} "Avast!")]))
+
+(defpage "/login" [] {:as user}
+         (layout
+           [:form.css-form {:ng-controller "LoginController"}
+            (text-field {:ng-model "username"} "What be yer Name?")
+            (password-field (:ng-model "password") "And password?")
+            (submit-button {:ng-click "submit()"} "Login")]))

@@ -25,3 +25,9 @@ function VoteController($scope, $http, $log) {
       .error($log.error);
   }
 }
+
+function LoginController($scope, $http, $log) {
+  $scope.submit = function() {
+    $http.post('/login/' + username);
+  }
+}
