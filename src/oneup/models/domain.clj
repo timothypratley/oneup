@@ -22,12 +22,15 @@
 (defmethod accept :add-pirate [add-pirate]
   (alter pirates
          assoc (:name add-pirate) (:pirate add-pirate)))
-(defn add-pirate-command [pirate]
+(defn add-pirate-command [username password]
   (dosync
-    (if (not (@pirates (:name pirate)))
-      (raise {:type :add-pirate
-              :name pirate
-              :pirate {:joined (java.util.Date.)}}))))
+    (let [pirate (@pirates username)]
+      (if (not pirate)
+        (boolean (raise {:type :add-pirate
+                :pirate {:joined (java.util.Date.)
+                         :username pirate
+                         :password password}}))
+        (= password (pirate :password))))))
 
 (let [last-id (ref 0)]
   (defn next-id []

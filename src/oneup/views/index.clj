@@ -68,9 +68,11 @@
             (submit-button {:ng-click "submit('yes')"} "Aye!")
             (submit-button {:ng-click "submit('no')"} "Avast!")]))
 
-(defpage "/login" [] {:as user}
+(defpage "/login" []
          (layout
            [:form.css-form {:ng-controller "LoginController"}
-            (text-field {:ng-model "username"} "What be yer Name?")
-            (password-field (:ng-model "password") "And password?")
-            (submit-button {:ng-click "submit()"} "Login")]))
+            [:div (label "username" "What be yer name?")
+             (text-field {:ng-model "username"} "username")]
+            [:div (label "password" "And plunderin' password?")
+             (password-field {:ng-model "password"} "password")]
+            (submit-button {:ng-click "submit()"} "Hoist the mainsail!")]))

@@ -26,7 +26,7 @@
          (if (not (errors? :vote))
            (add-vote-command (session/get :username) (yes vote))))
 
-(defpage "/login/:username" {:keys [username]}
-         (println "login" username)
-         (session/put! :username username)
-         (add-pirate-command username))
+(defpage [:post "/login"] {:keys [username password]}
+         (println "login" username password)
+         (if (add-pirate-command username password)
+           (session/put! :username username)))
