@@ -1,12 +1,14 @@
 (ns oneup.views.common
-  (:use [noir.core :only [defpartial]]
+  (:use [noir.core]
+        [hiccup.form-helpers]
         [hiccup.page-helpers]
         [hiccup.core]))
 
 (defpartial layout [& content]
             (html
               (doctype :html5)
-              [:html {:ng-app "oneup"}
+              [:html {:ng-app "oneup"
+                      :ng-controller "TopController"}
                [:head
                 [:title "oneup"]
                 (include-css "/css/reset.css")
@@ -17,7 +19,10 @@
                  [:div.navbar-inner
                   [:div.container {:style "width:85%"}
                    [:a.brand {:href "/"}
-                    [:strong "oneup"]]]]]
+                    [:strong "oneup"]]
+                   [:div.logout {:ng-show "username"}
+                    [:span "{{username}}"]
+                    (submit-button {:ng-click "logout()"} "logout")]]]]
                 content
                 (include-js "/js/angular-1.0.1.min.js")
                 (include-js "/js/angular-resource-1.0.1.min.js")

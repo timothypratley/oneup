@@ -76,3 +76,7 @@
             [:div (label "password" "And plunderin' password?")
              (password-field {:ng-model "password"} "password")]
             (submit-button {:ng-click "submit()"} "Hoist the mainsail!")]))
+
+(defpage "/foo" []
+         (layout
+           [:p "foo"]))

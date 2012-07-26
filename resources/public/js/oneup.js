@@ -1,5 +1,6 @@
 angular.module('oneup', ['oneup.service'])
   .run(function() {
+                   console.log("foo");
     //main
   });
 

@@ -30,7 +30,21 @@ function LoginController($scope, $http, $log) {
   $scope.submit = function() {
     $http.post('/login', null,
       {params: {username:$scope.username, password:$scope.password}})
-      .success($log.info)
+      .success(function(){
+        $scope.$emit('LoginSuccessEvent', $scope.username);
+        $log.info("LoginSuccessEvent sent " + $scope.username);
+      })
       .error($log.error);
+  }
+}
+                                                  
+function TopController($scope, $log) {
+  $scope.$on('LoginSuccessEvent', function(e,username) {
+    $log.info("LoginSuccessEvent received " + username);
+    $scope.username = username;
+  });
+  $scope.logout = function() {
+    $log.info("logout called");
+    $scope.username = null;
   }
 }
