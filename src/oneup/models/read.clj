@@ -24,7 +24,7 @@
       (update-in [:proposal-history] conj (proposal :id))
       (assoc :proposing (proposal :id))))
 
-(defmethod denormalize :add-proposal [proposal]
+(defmethod denormalize :proposal-added [proposal]
   (dosync
     ;(alter proposals
            ;assoc (proposal :id) proposal)
@@ -55,7 +55,7 @@
           (update-pirate [pirate :reject-count] ninc))))
     (alter leaderboard)))
 
-(defmethod denormalize :add-pirate [pirate]
+(defmethod denormalize :user-added [user]
   (dosync
     (alter pirate-summaries
-           assoc (:name pirate) (:joined pirate))))
+           assoc (:name user) (:joined user))))

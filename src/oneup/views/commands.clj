@@ -3,7 +3,14 @@
   (:use [noir.core]
         [noir.validation]
         [noir.response :only [json]]
-        [oneup.models.domain]))
+        [oneup.models.domain]
+        [oneup.models.read]
+        [oneup.models.io]))
+
+(doseq [e (read-events)]
+  (accept (second e)))
+(publisher denormalize)
+(storer store)
 
 ;Start or join a pirate group
 (defpage [:post "/plunder"] []
@@ -28,5 +35,5 @@
 
 (defpage [:post "/login"] {:keys [username password]}
          (println "login" username password)
-         (if (add-pirate-command username password)
+         (if (add-user-command username password)
            (session/put! :username username)))
