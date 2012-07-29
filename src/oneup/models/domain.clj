@@ -18,9 +18,10 @@
 
   (defn raise [event]
     ;TODO: how to make this sequential?
-    (@store event)
-    (send world accept event)
-    (@publish event)))
+    (let [e (assoc event :when (java.util.Date.))]
+      (@store e)
+      (send world accept e)
+      (@publish e))))
 
 
 (defmethod accept :user-added [world u]
@@ -31,7 +32,6 @@
     (if user
       (= password (user :password))
       (boolean (raise {:type :user-added
-                       :joined (java.util.Date.)
                        :username username
                        :password password})))))
 

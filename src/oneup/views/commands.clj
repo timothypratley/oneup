@@ -5,12 +5,8 @@
         [noir.response :only [json]]
         [oneup.models.domain]
         [oneup.models.read]
-        [oneup.models.io]))
-
-(doseq [e (read-events)]
-  (accept (second e)))
-(publisher denormalize)
-(storer store)
+        [oneup.models.io]
+        [oneup.models.injector]))
 
 ;Start or join a pirate group
 (defpage [:post "/plunder"] []
