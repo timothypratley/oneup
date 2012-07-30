@@ -39,7 +39,6 @@
   (defn next-id []
     (swap! last-id inc)))
 
-
 (defmethod accept :proposal-added [world p]
   (assoc-in world [:proposal (next-id)] p))
 
