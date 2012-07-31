@@ -1,0 +1,3 @@
+Use angularjs routing and views instead of static pages
+Make another datastore for events
+Separate query server and read servers
