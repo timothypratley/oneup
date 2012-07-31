@@ -12,7 +12,7 @@
   (alter pirate-summaries
          #(apply update-in % ks f args)))
 
-;(defmethod denormalize ::vote [vote]
+(defmethod denormalize :vote-added [vote])
   ;(dosync
     ;(update-pirate [(:pirate vote)]
            ;assoc-in [(vote :proposal-id) :votes (vote :rank)] (vote :value))))

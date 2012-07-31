@@ -4,7 +4,7 @@ function ForumController($scope, $http) {
   });
 }
 
-function ProposalController($scope, $http, $log) {
+function ProposeController($scope, $http, $log) {
   $scope.gold = [2,2,2,2,2];
   $scope.total = function() {
     var tt=0;

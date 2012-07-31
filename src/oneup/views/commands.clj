@@ -20,14 +20,15 @@
            (map #(Integer/parseInt %) [a b c d e])))
 
 ;As subordinate vote yes or no on a proposal
-(defn yes [vote] (#{\y \Y} (first vote)))
-(defn no [vote] (#{\n \N} (first vote)))
+(defn yes [vote] (boolean (#{\y \Y} (first vote))))
+(defn no [vote] (boolean (#{\n \N} (first vote))))
 (defpage [:post "/vote/:vote"] {:keys [vote]}
          (println "vote" vote)
          ;TODO: failed validation returns 404 without this error message...
          (rule (or (yes vote) (no vote)) [:vote "yes or no"])
          (if (not (errors? :vote))
-           (add-vote-command (session/get :username) (yes vote))))
+           (add-vote-command (session/get :username) (yes vote)))
+         "hi")
 
 (defpage [:post "/login"] {:keys [username password]}
          (println "login" username password)

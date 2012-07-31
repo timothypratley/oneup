@@ -1,8 +1,8 @@
 angular.module('oneup', ['oneup.service'])
   .config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when("/login", {templateUrl: "partials/login.html", controller: LoginCtrl})
-      .when("/propose", {templateUrl: "partials/propose.html", controller: ProposeCtrl})
-      .when("/vote", {templateUrl: "partials/vote.html", controller: VoteCtrl})
+    $routeProvider.when("/login", {templateUrl: "partials/login", controller: LoginController})
+      .when("/propose", {templateUrl: "partials/propose", controller: ProposeController})
+      .when("/vote", {templateUrl: "partials/vote", controller: VoteController})
       .otherwise({redirectTo: "/login"});
   }])
   .run(function() {

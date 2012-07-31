@@ -5,7 +5,7 @@
         [hiccup.core]
         [hiccup.form-helpers]))
 
-(defpage "/" []
+(defpage "/f" []
          (layout
            "Your name:" [:input {:type "text"
                                  :ng-model "yourname"
@@ -40,11 +40,15 @@
                      name)
      [:span.error {:ng-show (str "myForm." name ".$invalid")} (str "{{myForm." name ".$error}}")]]))
 
-(defpage "/propose" []
+
+(defpage "/" []
          (layout
+           [:div.ng-view]))
+
+(defpage "/partials/propose" []
+         (html
            [:p "How should the gold be divided?"]
            [:form.css-form {:name "myForm"
-                            :ng-controller "ProposalController"
                             :ng-submit "submit()"
                             :novalidate true}
             (gold-field 0)
@@ -56,27 +60,22 @@
             [:br]
             [:span.error {:ng-show "myForm.$invalid"} "{{myForm.$error}}"]
             [:br]
-            (submit-button {:id "submit"
-                            :ng-disabled "myForm.$invalid || total() != 10"}
+            (submit-button {:ng-disabled "myForm.$invalid || total() != 10"}
                            "Propose")]))
 
-(defpage "/vote" []
-         (layout
+(defpage "/partials/vote" []
+         (html
            [:p "Do you accept the proposal?"]
-           [:form.css-form {:ng-controller "VoteController"
-                            :novalidate true}
+           [:form.css-form {:novalidate true}
             (submit-button {:ng-click "submit('yes')"} "Aye!")
             (submit-button {:ng-click "submit('no')"} "Avast!")]))
 
-(defpage "/login" []
-         (layout
-           [:form.css-form {:ng-controller "LoginController"}
+(defpage "/partials/login" []
+         (html
+           [:form.css-form {:novalidate true
+                            :ng-submit "submit()"}
             [:div (label "username" "What be yer name?")
              (text-field {:ng-model "username"} "username")]
             [:div (label "password" "And plunderin' password?")
              (password-field {:ng-model "password"} "password")]
-            (submit-button {:ng-click "submit()"} "Hoist the mainsail!")]))
-
-(defpage "/foo" []
-         (layout
-           [:p "foo"]))
+            (submit-button "Hoist the mainsail!")]))
