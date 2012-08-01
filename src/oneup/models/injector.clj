@@ -4,5 +4,6 @@
         [oneup.models.read]))
 
 (read-events (partial send world accept))
+(read-events denormalize)
 (publisher denormalize)
 (storer store)

@@ -4,6 +4,10 @@ function ForumController($scope, $http) {
   });
 }
 
+function HarborController($scope) {
+
+}
+
 function ProposeController($scope, $http, $log) {
   $scope.gold = [2,2,2,2,2];
   $scope.total = function() {
@@ -32,7 +36,6 @@ function LoginController($scope, $http, $log) {
       {params: {username:$scope.username, password:$scope.password}})
       .success(function(){
         $scope.$emit('LoginSuccessEvent', $scope.username);
-        $log.info("LoginSuccessEvent sent " + $scope.username);
       })
       .error($log.error);
   }
@@ -40,11 +43,13 @@ function LoginController($scope, $http, $log) {
                                                   
 function TopController($scope, $log) {
   $scope.$on('LoginSuccessEvent', function(e,username) {
-    $log.info("LoginSuccessEvent received " + username);
     $scope.username = username;
   });
   $scope.logout = function() {
     $log.info("logout called");
     $scope.username = null;
+    $http.post('/logout')
+      .success($log.info)
+      .error($log.error);
   }
 }

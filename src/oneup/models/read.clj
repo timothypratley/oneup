@@ -56,6 +56,7 @@
     (alter leaderboard)))
 
 (defmethod denormalize :user-added [user]
+  (println "denormalize " user)
   (dosync
     (alter pirate-summaries
-           assoc (:name user) (:joined user))))
+           assoc (:username user) (:when user))))

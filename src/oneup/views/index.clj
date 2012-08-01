@@ -1,9 +1,12 @@
 (ns oneup.views.index
+  (:require [noir.session :as session])
   (:use [oneup.views.common]
+        [oneup.models.read]
         [noir.core]
         [noir.response :only [json]]
         [hiccup.core]
-        [hiccup.form-helpers]))
+        [hiccup.form-helpers]
+        [hiccup.page-helpers]))
 
 (defpage "/f" []
          (layout
@@ -44,6 +47,11 @@
 (defpage "/" []
          (layout
            [:div.ng-view]))
+
+(defpage "/partials/harbor" []
+         (html
+           [:span (str (@pirate-summaries (session/get :username)))]
+           (link-to "#/plunder" "Plunder!")))
 
 (defpage "/partials/propose" []
          (html

@@ -3,16 +3,16 @@ angular.module('oneup', ['oneup.service'])
     $routeProvider.when("/login", {templateUrl: "partials/login", controller: LoginController})
       .when("/propose", {templateUrl: "partials/propose", controller: ProposeController})
       .when("/vote", {templateUrl: "partials/vote", controller: VoteController})
+      .when("/harbor", {templateUrl: "partials/harbor", controller: HarborController})
       .otherwise({redirectTo: "/login"});
   }])
   .run(function() {
-                   console.log("foo");
-    //main
+    console.log("foo");
   });
 
 
 function AppController($scope, $http) {
-    /**
+  /**
    * Holds all the requests which failed due to 401 response.
    */
   scope.requests401 = [];

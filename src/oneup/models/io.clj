@@ -3,7 +3,7 @@
         [cheshire.core]
         [clj-time.format :only [parse]]))
 
-(def filename "event_log.clj")
+(def filename "event_log.json")
 
 (defn store
   "Stores an event in a file"

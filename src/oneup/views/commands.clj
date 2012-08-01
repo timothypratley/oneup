@@ -8,6 +8,7 @@
         [oneup.models.io]
         [oneup.models.injector]))
 
+
 ;Start or join a pirate group
 (defpage [:post "/plunder"] []
          (println "plunder"))
@@ -33,4 +34,9 @@
 (defpage [:post "/login"] {:keys [username password]}
          (println "login" username password)
          (if (add-user-command username password)
-           (session/put! :username username)))
+           (session/put! :username username)
+           ))
+
+(defpage [:post "/logout"] []
+         (println "logout")
+         (session/clear!))

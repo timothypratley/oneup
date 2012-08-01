@@ -18,9 +18,10 @@
                 [:header.navbar.navbar-fixed-top
                  [:div.navbar-inner
                   [:div.container {:style "width:85%"}
-                   [:a.brand {:href "/"}
-                    [:strong "oneup"]]
-                   [:div.logout {:ng-show "username"}
+                   [:a.brand {:href "/"} [:strong "oneup"]]
+                   "Feedback: "
+                   (mail-to "timothypratley@gmail.com")
+                   [:div.logout.ng-cloak {:ng-show "username"}
                     [:span "{{username}}"]
                     (submit-button {:ng-click "logout()"} "logout")]]]]
                 content
