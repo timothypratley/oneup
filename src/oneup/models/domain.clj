@@ -1,4 +1,5 @@
-(ns oneup.models.domain)
+(ns oneup.models.domain
+  (:use [oneup.models.helper]))
 
 (def world (agent {:user {}
                    :proposal {}
@@ -24,10 +25,15 @@
       (@publish e))))
 
 
-(defmethod accept :user-added [world u]
-  (assoc-in world [:user (:username u)] u))
+(defmethod accept :user-added
+  [world u]
+  (assoc-in world [:user (:username u)]
+             (reconcile {} u
+               [:copy :password]
+               [:copy :when :joined])))
 
-(defn add-user-command [username password]
+(defn add-user-command
+  [username password]
   (let [user ((@world :user) username)]
     (if user
       (= password (user :password))
@@ -35,30 +41,44 @@
                        :username username
                        :password password})))))
 
+
 (let [last-id (atom 0)]
   (defn next-id []
     (swap! last-id inc)))
 
-(defmethod accept :proposal-added [world p]
-  (assoc-in world [:proposal (next-id)] p))
+(defmethod accept :proposal-added
+  [world p]
+  (let [id (next-id)]
+    (assoc-in world [:proposal id]
+              (reconcile {} p
+                [:copy :user]
+                [:copy :vote]
+                [:create :voted [(p :when)]]
+                [:copy :gold]))
+    (assoc-in world [:user (first (p :user)) :proposed] id)))
 
 (defn gold? [g]
   (and (integer? g) (<= 0 g 10)))
-(defn add-proposal-command[user gold]
+
+(defn add-proposal-command
+  [user gold]
   (cond
     (not (= 5 (count gold))) "an array of five integers from 0 to 10 which sums to 10"
     (not (every? gold? gold)) "integers must be from 0 to 10"
     (not (= 10 (reduce + gold))) "must sum to 10"
+    (get-in @world [:user user :proposed]) "already have an active proposal"
     :else (raise {:type :proposal-added
                   :user [user nil nil nil nil]
                   :vote [:yes nil nil nil nil]
                   :gold gold})))
 
 
-(defmethod accept :vote-added [world v]
-  (assoc world [:vote (next-id)] v))
+(defmethod accept :vote-added
+  [world v]
+  (update-in world [:proposal :vote (v :position)] (v :value)))
 
-(defn add-vote-command [user b]
+(defn add-vote-command
+  [user b]
   (raise {:type :vote-added
           :user user
           :vote b}))

@@ -24,6 +24,8 @@
              (custom-fields k v))))
 (defn read-events [f]
   ; TODO: handle file not found
-  (io! (with-open [r (reader filename)]
-                  (doseq [e (parsed-seq r true)]
-                      (f (update-fields e))))))
+  (io! (let [f (file filename)]
+         (when (.exists f)
+           (with-open [r (reader f)]
+             (doseq [e (parsed-seq r true)]
+               (f (update-fields e))))))))
