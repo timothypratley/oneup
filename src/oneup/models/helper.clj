@@ -5,12 +5,15 @@
   [event entity pattern]
   (condp (partial = (pattern 0))
     :copy (let [from (pattern 1)
-                to (pattern 2 from)]
+                to (get pattern 2 from)]
             (assoc entity to (event from)))
-    :update (let [f (pattern 1)
-                  from (pattern 2)
-                  to (pattern 3 from)]
-              (update-in entity [to] (f (event from))))))
+    :update (let [to (pattern 1)
+                  f (pattern 2)
+                  from (get pattern 3)]
+              (update-in entity [to]
+                         #(if from
+                            (f (entity to) (event from))
+                            (f (entity to)))))))
 
 (defn reconcile
   "Helper function for using an event to update an entity"

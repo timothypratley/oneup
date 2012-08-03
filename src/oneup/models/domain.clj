@@ -1,40 +1,54 @@
 (ns oneup.models.domain
   (:use [oneup.models.helper]))
 
-(def world (agent {:user {}
-                   :proposal {}
-                   :vote {}}))
 
-(defmulti accept (fn [world event] (event :type)))
+(defmulti accept
+  "Updates the domain model according to the event that occured.
+   This should only be called from raise."
+  (fn [domain event] (event :type)))
 
-(let [publish (ref (fn [event]))
+(let [domain (agent {:user {}
+                     :proposal {}
+                     :vote {}})
+      publish (ref (fn [event]))
       store (ref (fn [event]))]
   
-  (defn publisher [f]
+  (defn publisher
+    "Sets the function that will publish events"
+    [f]
     (dosync
       (ref-set publish f)))
-  (defn storer [f]
+  (defn storer
+    "Sets the function that will store events"
+    [f]
     (dosync
       (ref-set store f)))
 
-  (defn raise [event]
+  (defn raise
+    "Accepts the event to the domain model.
+     The only updates to the domain model are done through raising events.
+     The event is then stored (so we can recreate the domain model)
+     and published (so read models can denormalize the event)."
+    [event]
     ;TODO: how to make this sequential?
     (let [e (assoc event :when (java.util.Date.))]
       (@store e)
-      (send world accept e)
+      (send domain accept e)
       (@publish e))))
 
 
 (defmethod accept :user-added
-  [world u]
-  (assoc-in world [:user (:username u)]
+  [domain u]
+  (assoc-in domain [:user (:username u)]
              (reconcile {} u
                [:copy :password]
                [:copy :when :joined])))
 
+;public
 (defn add-user-command
+  "Add a user"
   [username password]
-  (let [user ((@world :user) username)]
+  (let [user ((@domain :user) username)]
     (if user
       (= password (user :password))
       (boolean (raise {:type :user-added
@@ -47,26 +61,28 @@
     (swap! last-id inc)))
 
 (defmethod accept :proposal-added
-  [world p]
+  [domain p]
   (let [id (next-id)]
-    (assoc-in world [:proposal id]
+    (assoc-in domain [:proposal id]
               (reconcile {} p
                 [:copy :user]
                 [:copy :vote]
                 [:create :voted [(p :when)]]
                 [:copy :gold]))
-    (assoc-in world [:user (first (p :user)) :proposed] id)))
+    (assoc-in domain [:user (first (p :user)) :proposed] id)))
 
 (defn gold? [g]
   (and (integer? g) (<= 0 g 10)))
 
+;public
 (defn add-proposal-command
+  "Add a proposal"
   [user gold]
   (cond
     (not (= 5 (count gold))) "an array of five integers from 0 to 10 which sums to 10"
     (not (every? gold? gold)) "integers must be from 0 to 10"
     (not (= 10 (reduce + gold))) "must sum to 10"
-    (get-in @world [:user user :proposed]) "already have an active proposal"
+    (get-in @domain [:user user :proposed]) "already have an active proposal"
     :else (raise {:type :proposal-added
                   :user [user nil nil nil nil]
                   :vote [:yes nil nil nil nil]
@@ -74,10 +90,12 @@
 
 
 (defmethod accept :vote-added
-  [world v]
-  (update-in world [:proposal :vote (v :position)] (v :value)))
+  [domain v]
+  (update-in domain [:proposal :vote (v :position)] (v :value)))
 
+;public
 (defn add-vote-command
+  "Add a vote"
   [user b]
   (raise {:type :vote-added
           :user user
