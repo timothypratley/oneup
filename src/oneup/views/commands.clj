@@ -32,7 +32,8 @@
 
 (defpage [:post "/login"] {:keys [username password]}
          (println "login" username password)
-         (if (add-user-command username password)
+  ;TODO why is boolean required?
+         (if (boolean (add-user-command username password))
            (session/put! :username username)))
 
 (defpage [:post "/logout"] []

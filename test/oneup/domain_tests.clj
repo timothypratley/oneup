@@ -6,12 +6,3 @@
          (raise {:type :user-added
                  :username "bluebeard"
                  :password "barnacle"}))
-
-(deftest test-reconcile
-         (is (reconcile {:bar 0} {:foo 1}
-                    [:copy :foo])
-             {:bar 0
-              :foo 1})
-         (is (reconcile {} {:foo 1}
-                    [:copy :foo])
-             {:foo 1}))

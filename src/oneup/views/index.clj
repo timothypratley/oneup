@@ -48,6 +48,11 @@
          (layout
            [:div.ng-view]))
 
+(defpage "/partials/about" []
+         (html
+           [:p "Yeargh, welcome ye to the Five O Pirates."]
+           (link-to "#/login" "Login")))
+
 (defpage "/partials/harbor" []
          (html
            [:span (str (@pirate-summaries (session/get :username)))]

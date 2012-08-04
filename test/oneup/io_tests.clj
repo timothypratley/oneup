@@ -6,11 +6,11 @@
         [oneup.models.injector]))
 
 (deftest test-add-user-command
-         (add-user-command "bluebeard" "barnacle")
-         (is (:password ((@world :user) "bluebeard") "barnacle")))
+         (let [username "bluebeard"
+               password "barnacle"]
+           (add-user-command username password)
+           (is (:password (user username) password))
+           (is (:joined (@pirate-summaries username)))))
 
-(deftest test-hydration-domain
-         (read-events (partial send world accept)))
-
-(deftest test-hydrate-read
-         (read-events denormalize))
+(deftest test-hydrate
+         (read-events hydrate))

@@ -1,9 +1,6 @@
 (ns oneup.helper-tests
   (:use [clojure.test]
-        [oneup.models.domain]
-        [oneup.models.read]
-        [oneup.models.io]
-        [oneup.models.injector]))
+        [oneup.models.helper]))
 
 (deftest test-reconcile
          (is (reconcile {:bar 0} {:foo 1}

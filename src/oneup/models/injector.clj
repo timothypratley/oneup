@@ -3,7 +3,9 @@
         [oneup.models.io]
         [oneup.models.read]))
 
-(read-events (partial send world accept))
-(read-events denormalize)
+;configure the event store and read denormalizer
 (publisher denormalize)
 (storer store)
+
+;load the domain and read model from past events
+(read-events hydrate)

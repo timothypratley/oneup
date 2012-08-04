@@ -3,12 +3,12 @@
         [cheshire.core]
         [clj-time.format :only [parse]]))
 
-(def filename "event_log.json")
+(def events (file "events.json"))
 
 (defn store
   "Stores an event in a file"
   [event]
-  (io! (with-open [w (writer filename :append true)]
+  (io! (with-open [w (writer events :append true)]
                   (generate-stream event w)
                   (.newLine w))
        event))
@@ -24,8 +24,7 @@
              (custom-fields k v))))
 (defn read-events [f]
   ; TODO: handle file not found
-  (io! (let [f (file filename)]
-         (when (.exists f)
-           (with-open [r (reader f)]
-             (doseq [e (parsed-seq r true)]
-               (f (update-fields e))))))))
+  (io! (when (.exists events)
+         (with-open [r (reader events)]
+           (doseq [e (parsed-seq r true)]
+             (f (update-fields e)))))))

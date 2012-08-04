@@ -1,18 +1,30 @@
-(ns oneup.models.read)
+(ns oneup.models.read
+  (:use [oneup.models.helper]))
 
+;TODO why use ref here but agent for domain?
 (def leaderboard (ref {}))
 (def pirate-summaries (ref {}))
 (def proposal-statistics (ref {}))
 
 (def ninc (fnil inc 0))
 
+(let [last-id (atom 0)]
+  (defn next-id []
+    (swap! last-id inc)))
+
 (defmulti denormalize :type)
 
-(defn update-pirate [ks f & args]
+(defn update-pirate
+  [ks f & args]
   (alter pirate-summaries
          #(apply update-in % ks f args)))
 
-(defmethod denormalize :vote-added [vote])
+(defmethod denormalize :vote-added
+  [vote]
+  (alter pirate-summaries
+         update-in [(:username vote)]
+         reconcile
+         [:update :vote-count ninc]))
   ;(dosync
     ;(update-pirate [(:pirate vote)]
            ;assoc-in [(vote :proposal-id) :votes (vote :rank)] (vote :value))))
@@ -32,6 +44,11 @@
     (alter proposal-statistics
            update-in [(proposal :gold)] ninc)
     (update-pirate [(first (:pirates proposal))] made proposal)))
+
+(defmethod denormalize :proposal-closed
+  [closed]
+  (dosync
+    ))
 
 (defmethod denormalize :proposal-accepted [proposal]
   (dosync
@@ -56,7 +73,8 @@
     (alter leaderboard)))
 
 (defmethod denormalize :user-added [user]
-  (println "denormalize " user)
   (dosync
     (alter pirate-summaries
-           assoc (:username user) (:when user))))
+           assoc (:username user)
+               (reconcile {} user
+                 [:copy :when :joined]))))
