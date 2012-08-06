@@ -2,6 +2,7 @@
   (:require [noir.session :as session])
   (:use [oneup.views.common]
         [oneup.models.read]
+        [oneup.models.helper]
         [noir.core]
         [noir.response :only [json]]
         [hiccup.core]
@@ -32,18 +33,6 @@
 (defpage "/forum/:id" attrs 
          (json {:attrs attrs}))
 
-(defn gold-field [number]
-  (let [name (str "gold" number)]
-    [:p (text-field {:ng-model (str "gold[" number "]")
-                     :type "number"
-                     :min 0
-                     :max 10
-                     :required true
-                     :integer true}
-                     name)
-     [:span.error {:ng-show (str "myForm." name ".$invalid")} (str "{{myForm." name ".$error}}")]]))
-
-
 (defpage "/" []
          (layout
            [:div.ng-view]))
@@ -55,26 +44,35 @@
 
 (defpage "/partials/harbor" []
          (html
-           [:span (str (@pirate-summaries (session/get :username)))]
+           [:p (str (@pirate-summaries (session/get :username)))]
            (link-to "#/plunder" "Plunder!")))
+
+(def gold-field
+  [:div {:ng-repeat "g in gold"}
+    [:ng-form {:name "f"}
+     (text-field {:ng-model "g.gold"
+                        :type "number"
+                        :min 0
+                        :max 10
+                        :required true
+                        :integer true}
+          "g")
+     [:span.error {:ng-show "f.g.$invalid"} "[X] "]
+     [:span.error {:ng-show "f.g.$error.integer"} "Must be an integer"]
+     [:span.error {:ng-show "f.g.$error.required"} "Required"]]])
 
 (defpage "/partials/propose" []
          (html
-           [:p "How should the gold be divided?"]
-           [:form.css-form {:name "myForm"
+           [:form.css-form {:name "x"
                             :ng-submit "submit()"
                             :novalidate true}
-            (gold-field 0)
-            (gold-field 1)
-            (gold-field 2)
-            (gold-field 3)
-            (gold-field 4)
-            (label "total" "Total: {{total()}}")
-            [:br]
-            [:span.error {:ng-show "myForm.$invalid"} "{{myForm.$error}}"]
-            [:br]
-            (submit-button {:ng-disabled "myForm.$invalid || total() != 10"}
-                           "Propose")]))
+             [:p "How should the gold be divided?"]
+             gold-field
+             (label "total" "Total: {{total()}}")
+             [:br]
+             [:span.error {:ng-show "x.$invalid"} "{{x.$error}}"]
+             [:br]
+             (submit-button {:ng-disabled "x.$invalid || total() != 10"} "Propose")]))
 
 (defpage "/partials/vote" []
          (html

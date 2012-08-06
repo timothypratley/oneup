@@ -14,7 +14,7 @@
 
 ;As leader propose how to divide the gold
 (defpage [:post "/propose/:a/:b/:c/:d/:e"] {:keys [a b c d e]}
-         (println "propose" a b c d e)
+         (println "propose " a b c d e " by " (session/get :username))
          (add-proposal-command
            (session/get :username)
            (map #(Integer/parseInt %) [a b c d e])))

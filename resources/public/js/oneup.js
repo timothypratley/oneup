@@ -3,13 +3,13 @@ angular.module('oneup', ['oneup.service'])
       $routeProvider
       .when("/about", { templateUrl: "partials/about", controller: AboutController })
       .when("/login", { templateUrl: "partials/login", controller: LoginController })
-      .when("/propose", { templateUrl: "partials/propose", controller: ProposeController })
+      .when("/propose/:size", { templateUrl: "partials/propose", controller: ProposeController })
       .when("/vote", { templateUrl: "partials/vote", controller: VoteController })
       .when("/harbor", { templateUrl: "partials/harbor", controller: HarborController })
       .otherwise({ redirectTo: "/about" });
   } ])
   .run(function () {
-      console.log("foo");
+      //console.log("foo");
   });
 
 

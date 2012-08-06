@@ -13,15 +13,29 @@ function HarborController($scope) {
 
 }
 
-function ProposeController($scope, $http, $log) {
-    $scope.gold = [2, 2, 2, 2, 2];
+function ProposeController($scope, $http, $log, $routeParams, $location) {
+    var ii,
+        share = Math.floor(10 / $routeParams.size);
+
+    // initialize the gold to split among party of 'size' pirates
+    $scope.gold = [];
+    for (ii = 0; ii < $routeParams.size; ii++) {
+        $scope.gold[ii] = { gold: share };
+    }
+
+    // sum all the gold allocated
     $scope.total = function () {
-        var tt = 0;
-        for (var ii in $scope.gold) { tt += $scope.gold[ii]; }
+        var ii,
+            tt = 0;
+        for (ii in $scope.gold) { tt += $scope.gold[ii].gold; }
         return tt;
     };
+
+    // send the proposal to the server
     $scope.submit = function () {
-        $http.post("/propose/" + $scope.gold.join("/"))
+        var a = [];
+        for (x in $scope.gold) { a[x] = $scope.gold[x].gold; }
+        $http.post("/propose/" + a.join("/"))
         .success(function (data, status) {
             $log.info(data, status);
             $location.path("/harbor");

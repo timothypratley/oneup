@@ -34,7 +34,7 @@
   (-> pirate-summary
       (update-in [:proposed-count] ninc)
       (update-in [:proposal-history] conj (proposal :id))
-      (assoc :proposing (proposal :id))))
+      (assoc :proposing proposal)))
 
 (defmethod denormalize :proposal-added [proposal]
   (dosync
@@ -43,7 +43,7 @@
     (println proposal)
     (alter proposal-statistics
            update-in [(proposal :gold)] ninc)
-    (update-pirate [(first (:pirates proposal))] made proposal)))
+    (update-pirate [(:username proposal)] made proposal)))
 
 (defmethod denormalize :proposal-closed
   [closed]
