@@ -16,7 +16,9 @@
 (defn custom-fields [k v]
   (cond
     (= k :type) [k (keyword v)]
-    (= k :when) [k (parse v)]
+    ;TODO: why do I need joda time just to take it back to a Date?
+    ;well apparently cheshire doesn't want to serialize joda times
+    (= k :when) [k (.toDate (parse v))]
     :else [k v]))
 (defn update-fields [e]
   (into {}

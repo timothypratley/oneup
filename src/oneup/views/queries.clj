@@ -2,19 +2,15 @@
   (:use [oneup.views.common]
         [oneup.models.read]
         [noir.core]
-        [noir.validation]
-        [noir.response :only [json]]))
+        [cheshire.core]))
 
 (defpage "/leaderboard" []
          (println "leaderboard")
-         (@leaderboard))
+         (generate-string @leaderboard))
 
 (defpage "/pirate/:name" {:keys [name]}
-         (println "pirate:" name)
-         (layout
-           (@pirate-summaries name)))
+         (generate-string (@pirate-summaries name)))
 
 (defpage "/stats/:a/:b/:c/:d/:e" {:keys [a b c d e]}
          (println "stats:" [a b c d e])
-         (layout
-           (@proposal-statistics [a b c d e])))
+         (generate-string (@proposal-statistics [a b c d e])))

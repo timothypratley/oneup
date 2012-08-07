@@ -4,6 +4,7 @@ angular.module('oneup', ['oneup.service'])
       .when("/about", { templateUrl: "partials/about", controller: AboutController })
       .when("/login", { templateUrl: "partials/login", controller: LoginController })
       .when("/propose/:size", { templateUrl: "partials/propose", controller: ProposeController })
+      .when("/pirate/:name", { templateUrl: "partials/pirate", controller: PirateController })
       .when("/vote", { templateUrl: "partials/vote", controller: VoteController })
       .when("/harbor", { templateUrl: "partials/harbor", controller: HarborController })
       .otherwise({ redirectTo: "/about" });

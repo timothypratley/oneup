@@ -13,6 +13,19 @@ function HarborController($scope) {
 
 }
 
+function PirateController($scope, $http, $log, $routeParams) {
+    $scope.username = $routeParams.name;
+    $http.get("/pirate/" + $routeParams.name)
+    .success(function (data, status) {
+        $log.info(data, status);
+        // TODO: Why is null taken as a string? must be a nicer way... (maybe return nothing from request)
+        if (data !== "null") {
+            $scope.pirate = data;
+        }
+    })
+    .error($log.error);
+}
+
 function ProposeController($scope, $http, $log, $routeParams, $location) {
     var ii,
         share = Math.floor(10 / $routeParams.size);

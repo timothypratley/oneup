@@ -61,6 +61,12 @@
      [:span.error {:ng-show "f.g.$error.integer"} "Must be an integer"]
      [:span.error {:ng-show "f.g.$error.required"} "Required"]]])
 
+(defpage "/partials/pirate" []
+  (html
+    [:h3 "Name: {{username}}"]
+    [:p {:ng-show "pirate"} "Joined: {{pirate.joined}} Full: {{pirate}}"]
+    [:p {:ng-show "!pirate"} "No such scurvy sea dog"]))
+
 (defpage "/partials/propose" []
          (html
            [:form.css-form {:name "x"
