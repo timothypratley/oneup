@@ -9,8 +9,7 @@ function AboutController($scope) {
 
 }
 
-function HarborController($scope) {
-
+function HarborController($scope, $http, $log, $routeParams) {
 }
 
 function PirateController($scope, $http, $log, $routeParams) {

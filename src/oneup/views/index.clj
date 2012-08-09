@@ -40,11 +40,21 @@
 (defpage "/partials/about" []
          (html
            [:p "Yeargh, welcome ye to the Five O Pirates."]
-           (link-to "#/login" "Login")))
+           "Feedback: "
+           (mail-to "timothypratley@gmail.com")))
+
+(defn pirate
+  [username]
+  [:div
+    [:h3 "Name: " username]
+    [:div {:ng-show "pirate"}
+      [:p "Joined: {{pirate.joined}}"]
+      [:p "Full: {{pirate}}"]]
+    [:div {:ng-show "!pirate"} "No such scurvy sea dog"]])
 
 (defpage "/partials/harbor" []
          (html
-           [:p (str (@pirate-summaries (session/get :username)))]
+           (pirate (session/get :username))
            (link-to "#/plunder" "Plunder!")))
 
 (def gold-field
@@ -62,10 +72,7 @@
      [:span.error {:ng-show "f.g.$error.required"} "Required"]]])
 
 (defpage "/partials/pirate" []
-  (html
-    [:h3 "Name: {{username}}"]
-    [:p {:ng-show "pirate"} "Joined: {{pirate.joined}} Full: {{pirate}}"]
-    [:p {:ng-show "!pirate"} "No such scurvy sea dog"]))
+         (html (pirate "{{username}}")))
 
 (defpage "/partials/propose" []
          (html
