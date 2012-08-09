@@ -96,3 +96,13 @@
             [:div (label "password" "And plunderin' password?")
              (password-field {:ng-model "password"} "password")]
             (submit-button "Hoist the mainsail!")]))
+
+(defpage "/partials/leaderboard" []
+  (html
+    [:h3 "Leaderboard"]
+    [:table
+     [:tr {:ng-repeat "leader in leaders"}
+      [:td "{{leader.username}}"]
+      [:td "{{leader.gold}}"]
+      [:td "{{leader.deaths}}"]
+      [:td "{{leader.accepted}}"]]]))

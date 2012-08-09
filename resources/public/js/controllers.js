@@ -96,3 +96,12 @@ function TopController($scope, $http, $log, $location) {
         .error($log.error);
     }
 }
+
+function LeaderboardController($scope) {
+	$http.post("/leaderboard")
+	.success(function (data, status) {
+		$log.info(data,status);
+		$scope.leaderboard = data;
+	})
+	.error($log.error);
+}

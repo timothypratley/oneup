@@ -7,6 +7,7 @@ angular.module('oneup', ['oneup.service'])
       .when("/pirate/:name", { templateUrl: "partials/pirate", controller: PirateController })
       .when("/vote", { templateUrl: "partials/vote", controller: VoteController })
       .when("/harbor", { templateUrl: "partials/harbor", controller: HarborController })
+      .when("/leaderboard", { templateUrl: "partials/leaderboard", controller: LeaderboardController })
       .otherwise({ redirectTo: "/about" });
   } ])
   .run(function () {
