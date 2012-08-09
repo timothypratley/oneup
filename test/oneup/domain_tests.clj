@@ -1,8 +1,5 @@
-(ns oneup.io-tests
-  (:use [clojure.test]
-        [oneup.models.domain]))
+(ns oneup.domain-tests
+  (:use
+    [oneup.models.domain]))
 
-(deftest test-raise
-         (raise {:type :user-added
-                 :username "bluebeard"
-                 :password "barnacle"}))
+
