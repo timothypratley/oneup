@@ -50,7 +50,8 @@
     [:div {:ng-show "pirate"}
       [:p "Joined: {{pirate.joined}}"]
       [:p "Full: {{pirate}}"]]
-    [:div {:ng-show "!pirate"} "No such scurvy sea dog"]])
+    [:div {:ng-show "!pirate"}
+      "No such scurvy sea dog sails the high seas"]])
 
 (defpage "/partials/harbor" []
          (html
@@ -113,3 +114,4 @@
       [:td "{{leader.gold}}"]
       [:td "{{leader.deaths}}"]
       [:td "{{leader.accepted}}"]]]))
+

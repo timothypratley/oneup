@@ -1,5 +1,5 @@
-angular.module('oneup', ['oneup.service'])
-  .config(['$routeProvider', function ($routeProvider) {
+angular.module('oneup', [])
+  .config(function ($routeProvider, $httpProvider) {
       $routeProvider
       .when("/about", { templateUrl: "partials/about", controller: AboutController })
       .when("/login", { templateUrl: "partials/login", controller: LoginController })
@@ -9,7 +9,32 @@ angular.module('oneup', ['oneup.service'])
       .when("/harbor", { templateUrl: "partials/harbor", controller: HarborController })
       .when("/leaderboard", { templateUrl: "partials/leaderboard", controller: LeaderboardController })
       .otherwise({ redirectTo: "/about" });
-  } ])
+	  $httpProvider.responseInterceptors.push(function($q) {
+		function success(response) {
+		  return response;
+		}
+	 
+		function error(response) {
+		  var deferred, req;
+		  if (response.status == 401) {
+			deferred = $q.defer();
+			req = {
+			  config: response.config,
+			  deferred: deferred
+			}
+			$scope.requests401.push(req);
+			$scope.$broadcast('event:loginRequired');
+			return deferred.promise;
+		  }
+		  // otherwise
+		  return $q.reject(response);
+		}
+	 
+		return function(promise) {
+		  return promise.then(success, error);
+		}
+	  })
+  })
   .run(function () {
       //console.log("foo");
   });

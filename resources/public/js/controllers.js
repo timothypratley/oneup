@@ -9,7 +9,18 @@ function AboutController($scope) {
 
 }
 
+// TODO: embed pirate in harbor instead
 function HarborController($scope, $http, $log, $routeParams) {
+	$log.info("username: " + $scope.username);
+    $http.get("/pirate/" + $scope.username)
+    .success(function (data, status) {
+        $log.info(data, status);
+        // TODO: Why is null taken as a string? must be a nicer way... (maybe return nothing from request)
+        if (data !== "null") {
+            $scope.pirate = data;
+        }
+    })
+    .error($log.error);
 }
 
 function PirateController($scope, $http, $log, $routeParams) {
