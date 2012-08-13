@@ -107,11 +107,12 @@ function TopController($scope, $http, $log, $location) {
     }
 }
 
-function LeaderboardController($scope) {
-	$http.post("/leaderboard")
-	.success(function (data, status) {
-		$log.info(data,status);
-		$scope.leaderboard = data;
-	})
-	.error($log.error);
+function LeaderboardController($scope, $http, $log) {
+    $http.get("/leaderboard")
+    .success(function (data, status) {
+        $log.info(data,status);
+        $scope.leaderboard = data;
+    })
+    .error($log.error);
 }
+

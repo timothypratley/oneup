@@ -2,79 +2,92 @@
   (:use [oneup.models.helper]))
 
 ;TODO why use ref here but agent for domain?
-(def leaderboard (ref {}))
-(def pirate-summaries (ref {}))
+(def leaderboard (ref (sorted-map-by (fn [a b] ))))
+(def user-summaries (ref {}))
 (def proposal-statistics (ref {}))
 
+(def update-user (partial alter user-summaries update-in))
 (def ninc (fnil inc 0))
 
-(let [last-id (atom 0)]
-  (defn next-id []
-    (swap! last-id inc)))
+(defn score
+  "Calculate the score for a user"
+  [username]
+  (get @user-summaries username :gold 0))
+
+;TODO: choose a better datastructure
+; a sorted set of pairs?
+; a map of ranks to pairs?
+; a linked list of pairs?
+(defn update-leaderboard
+  [username]
+  (dosync
+    (alter leaderboard assoc username (score username))))
 
 (defmulti denormalize :type)
 
-(defn update-pirate
-  [ks f & args]
-  (alter pirate-summaries
-         #(apply update-in % ks f args)))
+(defmethod denormalize :proposal-added [proposal]
+  (println proposal)
+  (dosync
+    (let [leader (proposal :username)
+          nils (repeat (dec (count (proposal :gold))) nil)
+          make-vec #(vec (cons % nils))]
+      (alter proposal-statistics
+             update-in [(proposal :gold)] ninc)
+      (alter user-summaries
+             update-in [leader]
+             reconcile proposal
+             [:update :proposed-count ninc]
+             [:update :proposal-history conj :gold])
+      (alter user-summaries
+             update-in [leader :proposal :size]
+             reconcile proposal
+             [:copy :gold]
+             [:setf :users make-vec :username]
+             [:setf :voted make-vec :when]
+             [:set :vote (make-vec true)])
+      (update-leaderboard leader))))
 
 (defmethod denormalize :vote-added
   [vote]
-  (alter pirate-summaries
-         update-in [(:username vote)]
-         reconcile
-         [:update :vote-count ninc]))
-  ;(dosync
-    ;(update-pirate [(:pirate vote)]
-           ;assoc-in [(vote :proposal-id) :votes (vote :rank)] (vote :value))))
-
-(defn made [pirate-summary proposal]
-  (println pirate-summary)
-  (-> pirate-summary
-      (update-in [:proposed-count] ninc)
-      (update-in [:proposal-history] conj (proposal :id))
-      (assoc :proposing proposal)))
-
-(defmethod denormalize :proposal-added [proposal]
   (dosync
-    ;(alter proposals
-           ;assoc (proposal :id) proposal)
-    (println proposal)
-    (alter proposal-statistics
-           update-in [(proposal :gold)] ninc)
-    (update-pirate [(:username proposal)] made proposal)))
-
-(defmethod denormalize :proposal-closed
-  [closed]
-  (dosync
-    ))
+    (alter user-summaries
+           update-in [(:username vote)]
+           reconcile vote
+           [:update :vote-count ninc])
+    (println "VOTE-ADDED " vote)
+    (alter user-summaries
+           update-in [(vote :leader) :proposal (vote :size)]
+           reconcile vote
+           [:update :users assoc :rank :username]
+           [:update :voted assoc :rank :when]
+           [:update :vote assoc :rank :vote])
+    (update-leaderboard (vote :username))
+    (update-leaderboard (vote :leader))))
 
 (defmethod denormalize :proposal-accepted [proposal]
   (dosync
-    (doseq [ii (range (count (:pirates proposal)))]
-      (let [pirate ((proposal :pirates) ii)
+    (update-user [(first (proposal :users)) :success-count] ninc)
+    (doseq [ii (range (count (proposal :users)))]
+      (let [username ((proposal :users) ii)
             gold ((proposal :gold) ii)]
-        (update-pirate [pirate :plunder-count] ninc)
-        (update-pirate [pirate :gold] + gold)
-        (if (= 0 ii)
-          (update-pirate [pirate :success-count] ninc)
-          (update-pirate [pirate :accept-count] ninc))))
-    (alter leaderboard)))
+        (update-user [username :gold] + gold)
+        (update-user [username :plunder-count] ninc)
+        (update-leaderboard username)))))
 
 
 (defmethod denormalize :proposal-rejected [proposal]
   (dosync
-    (doseq [ii (range (count (:pirates proposal)))]
-      (let [pirate ((proposal :pirates) ii)]
-        (if (= 0 ii)
-          (update-pirate [pirate :failure-count] ninc)
-          (update-pirate [pirate :reject-count] ninc))))
-    (alter leaderboard)))
+    (update-user [(first (proposal :users)) :failure-count] ninc)
+    (doseq [ii (range (count (proposal :users)))]
+      (let [username ((proposal :users) ii)]
+        (update-user [username :mutiny-count] ninc)
+        (update-leaderboard username)))))
 
 (defmethod denormalize :user-added [user]
   (dosync
-    (alter pirate-summaries
-           assoc (:username user)
-               (reconcile {} user
-                 [:copy :when :joined]))))
+    (update-user [(:username user)]
+                 reconcile user
+                 [:copy :when :joined]
+                 [:copy :password])
+    (update-leaderboard (:username user))))
+
