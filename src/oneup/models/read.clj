@@ -2,7 +2,7 @@
   (:use [oneup.models.helper]))
 
 ;TODO why use ref here but agent for domain?
-(def leaderboard (ref (sorted-map-by (fn [a b] ))))
+(def leaderboard (ref []))
 (def user-summaries (ref {}))
 (def proposal-statistics (ref {}))
 
@@ -21,6 +21,10 @@
 (defn update-leaderboard
   [username]
   (dosync
+    ;calc the new score (and save it to user)
+    ;find the new rank (and save it to user)
+    ;update and save all the users with new ranks between old and new
+    ;move them in the vector
     (alter leaderboard assoc username (score username))))
 
 (defmulti denormalize :type)
@@ -89,5 +93,6 @@
                  reconcile user
                  [:copy :when :joined]
                  [:copy :password])
+    (alter leaderboard conj user)
     (update-leaderboard (:username user))))
 
