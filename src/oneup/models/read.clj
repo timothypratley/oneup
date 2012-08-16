@@ -12,20 +12,36 @@
 (defn score
   "Calculate the score for a user"
   [username]
-  (get @user-summaries username :gold 0))
+  (get-in @user-summaries [username :gold] 0))
 
-;TODO: choose a better datastructure
-; a sorted set of pairs?
-; a map of ranks to pairs?
-; a linked list of pairs?
+(defn swapv [v i1 i2] 
+   (assoc v i2 (v i1) i1 (v i2)))
+
 (defn update-leaderboard
   [username]
   (dosync
-    ;calc the new score (and save it to user)
-    ;find the new rank (and save it to user)
-    ;update and save all the users with new ranks between old and new
-    ;move them in the vector
-    (alter leaderboard assoc username (score username))))
+    ;start at the current rank
+    (let [rank (atom (get-in @user-summaries [username :rank]))
+          new-score (score username)]
+      ;calc the new score and save it to user
+      (alter user-summaries assoc-in [username :score] new-score)
+      ;swap ranks upward, updating the swappie as we go
+      (println "DEBUG " username " : " (@user-summaries username))
+      (println "DEBUG leaderboard: " @leaderboard)
+      (println "DEBUG rank: " @rank)
+      (while (and (pos? @rank)
+                  (< ((@user-summaries (@leaderboard (dec @rank))) :score) new-score))
+        (alter leaderboard swapv @rank (dec @rank))
+        (alter user-summaries assoc-in [(@leaderboard @rank) :rank] @rank)
+        (swap! rank dec))
+      ;or swap ranks downward
+      (while (and (< @rank (dec (count @leaderboard)))
+                  (> ((@user-summaries (leaderboard (inc @rank))) :score) new-score))
+        (alter leaderboard swapv @rank (inc @rank))
+        (alter user-summaries assoc-in [(@leaderboard @rank) :rank] @rank)
+        (swap! rank inc))
+      ;until we reach the right rank, and save the new rank
+      (alter user-summaries assoc-in [username :rank] @rank))))
 
 (defmulti denormalize :type)
 
@@ -89,10 +105,13 @@
 
 (defmethod denormalize :user-added [user]
   (dosync
-    (update-user [(:username user)]
-                 reconcile user
-                 [:copy :when :joined]
-                 [:copy :password])
-    (alter leaderboard conj user)
-    (update-leaderboard (:username user))))
+    (let [username (user :username)]
+      (update-user [username]
+                   reconcile user
+                   [:copy :when :joined]
+                   [:copy :password]
+                   [:set :score 0]
+                   [:set :rank (count @leaderboard)])
+      (alter leaderboard conj username)
+      (update-leaderboard username))))
 
