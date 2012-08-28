@@ -1,42 +1,32 @@
-function ForumController($scope, $http) {
+function ForumCtrl($scope, $http) {
     $http.get("forum")
     .success(function (data) {
         $scope.posts = data;
     });
 }
 
-function AboutController($scope) {
+function AboutCtrl($scope) {
 
 }
 
 // TODO: embed pirate in harbor instead
-function HarborController($scope, $http, $log, $routeParams) {
-	$log.info("username: " + $scope.username);
-    $http.get("/pirate/" + $scope.username)
-    .success(function (data, status) {
-        $log.info(data, status);
-        // TODO: Why is null taken as a string? must be a nicer way... (maybe return nothing from request)
-        if (data !== "null") {
-            $scope.pirate = data;
-        }
+function HarborCtrl($scope, $http, $log, $routeParams, user) {
+    $http.get("/pirate/" + user.username)
+    .success(function (data) {
+        $scope.pirate = angular.fromJson(data);
     })
     .error($log.error);
 }
 
-function PirateController($scope, $http, $log, $routeParams) {
-    $scope.username = $routeParams.name;
+function PirateCtrl($scope, $http, $log, $routeParams) {
     $http.get("/pirate/" + $routeParams.name)
-    .success(function (data, status) {
-        $log.info(data, status);
-        // TODO: Why is null taken as a string? must be a nicer way... (maybe return nothing from request)
-        if (data !== "null") {
-            $scope.pirate = data;
-        }
+    .success(function (data) {
+        $scope.pirate = angular.fromJson(data);
     })
     .error($log.error);
 }
 
-function ProposeController($scope, $http, $log, $routeParams, $location) {
+function ProposeCtrl($scope, $http, $log, $routeParams, $location) {
     var ii,
         share = Math.floor(10 / $routeParams.size);
 
@@ -59,59 +49,62 @@ function ProposeController($scope, $http, $log, $routeParams, $location) {
         var a = [];
         for (x in $scope.gold) { a[x] = $scope.gold[x].gold; }
         $http.post("/propose/" + a.join("/"))
-        .success(function (data, status) {
-            $log.info(data, status);
-            $location.path("/harbor");
-        })
+        .success($log.info(data))
         .error($log.error);
+        $location.path("/harbor");
     };
 }
 
-function VoteController($scope, $http, $log, $location) {
+function VoteCtrl($scope, $http, $log, $location) {
     $scope.submit = function (vote) {
         $http.post("/vote/" + vote)
-        .success(function (data, status) {
-            $log.info(data, status);
-            $location.path("/harbor");
-        })
+        .success($log.info)
         .error($log.error);
+        $location.path("/harbor");
     }
 }
 
-function LoginController($scope, $http, $log, $location) {
+function LoginCtrl($scope, $http, $log, $location, authService) {
+    $scope.username = "";
+    $scope.password = "";
     $scope.submit = function () {
+        // capture the current username
+        var username = $scope.username;
         $http.post("/login", null,
-            { params: { username: $scope.username, password: $scope.password} })
-        .success(function (data, status) {
-            $log.info(data, status);
-            $scope.$emit("LoginSuccessEvent", $scope.username);
-            $location.path("/harbor");
-        })
+            {params: {username: username,
+                      password: $scope.password}})
+        .success(authService.loginConfirmed)
         .error($log.error);
     }
 }
 
-function TopController($scope, $http, $log, $location) {
-    $scope.$on("LoginSuccessEvent", function (e, username) {
-        $scope.username = username;
+function TopCtrl($scope, $http, $log, $location, user, authService) {
+    $scope.user = user;
+    $scope.$on('event:auth-loginConfirmed', function() {
+        //TODO: how to bind directly to user?
+        $scope.user = user;
+        $log.info(user);
+    });
+    $scope.$on('event:auth-loginRequired', function() {
+        $scope.user = {};
     });
     $scope.logout = function () {
         $log.info("logout called");
-        $scope.username = null;
+        user.username = null;
         $http.post("/logout")
-        .success(function (data, status) {
-            $log.info(data, status);
-            $location.path("/");
-        })
-        .error($log.error);
+            .success($log.info)
+            .error($log.error);
+        $location.path("/");
+    }
+    $scope.login = function () {
+        authService.loginRequest();
     }
 }
 
-function LeaderboardController($scope, $http, $log) {
+function LeaderboardCtrl($scope, $http, $log) {
     $http.get("/leaderboard")
-    .success(function (data, status) {
-        $log.info(data,status);
-        $scope.leaderboard = data;
+    .success(function (data) {
+        $scope.leaderboard = angular.fromJson(data);
     })
     .error($log.error);
 }

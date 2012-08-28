@@ -5,3 +5,5 @@ pom.xml
 /bin/
 .lein-deps-sum
 /.settings/
+*~
+*.swp

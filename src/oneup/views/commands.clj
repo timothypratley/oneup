@@ -2,7 +2,7 @@
   (:require [noir.session :as session])
   (:use [noir.core]
         [noir.validation]
-        [noir.response :only [json]]
+        [noir.response :only [json status]]
         [oneup.models.domain]
         [oneup.models.read]
         [oneup.models.io]
@@ -30,12 +30,10 @@
            (add-vote-command (session/get :username) (yes vote)))
          "hi")
 
-(defpage [:post "/login"] {:keys [username password]}
-         (println "login" username password)
-  ;TODO why is boolean required?
-         (if (boolean (add-user-command username password))
-           (session/put! :username username)))
+(defpage [:post "/register"] {:keys [username password]}
+         (println "register" username)
+         (let [r (add-user-command username password)]
+           (if (string? r)
+             (status 409 r)
+             (json (session/put! :username username)))))
 
-(defpage [:post "/logout"] []
-         (println "logout")
-         (session/clear!))
