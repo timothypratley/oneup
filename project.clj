@@ -6,5 +6,6 @@
                            [cheshire "4.0.1"]
                            [clj-time "0.4.4"]
                            [expectations "1.4.3"]]
-            :dev-dependencies [[lein-expectations "0.0.5"]
+            :dev-dependencies [[lein-difftest "1.3.7"]
+                               [lein-expectations "0.0.5"]
                                [lein-autoexpect "0.1.2"]])

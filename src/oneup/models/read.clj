@@ -26,9 +26,9 @@
       ;calc the new score and save it to user
       (alter user-summaries assoc-in [username :score] new-score)
       ;swap ranks upward, updating the swappie as we go
-      (println "DEBUG " username " : " (@user-summaries username))
-      (println "DEBUG leaderboard: " @leaderboard)
-      (println "DEBUG rank: " @rank)
+      #_(println "DEBUG " username " : " (@user-summaries username))
+      #_(println "DEBUG leaderboard: " @leaderboard)
+      #_(println "DEBUG rank: " @rank)
       (while (and (pos? @rank)
                   (< ((@user-summaries (@leaderboard (dec @rank))) :score) new-score))
         (alter leaderboard swapv @rank (dec @rank))
@@ -46,7 +46,6 @@
 (defmulti denormalize :type)
 
 (defmethod denormalize :proposal-added [proposal]
-  (println proposal)
   (dosync
     (let [leader (proposal :username)
           nils (repeat (dec (count (proposal :gold))) nil)
@@ -74,7 +73,6 @@
            update-in [(:username vote)]
            reconcile vote
            [:update :vote-count ninc])
-    (println "VOTE-ADDED " vote)
     (alter user-summaries
            update-in [(vote :leader) :proposal (vote :size)]
            reconcile vote

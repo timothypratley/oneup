@@ -14,7 +14,6 @@
                    (apply f (map event (drop 3 pattern)))))
     :copy (let [from (pattern 1)
                 to (get pattern 2 from)]
-            (println "ENTITY " entity)
             (assoc entity to (event from)))
     :update (let [to (pattern 1)
                   f (pattern 2)]
