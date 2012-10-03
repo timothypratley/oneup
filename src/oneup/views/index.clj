@@ -9,13 +9,85 @@
         [hiccup.form-helpers]
         [hiccup.page-helpers]))
 
+(def login
+  [:div#login.modal.hide.fade {:tabindex -1
+                              :role "dialog"
+                              :aria-labelledby "Login"
+                              :aria-hidden "true"}
+  [:div.modal-header
+   "Login to Oneup"
+   [:button.close {:type "button"
+                   :data-dismiss "modal"
+                   :aria-hidden "true"} "x"]]
+  [:div.modal-body
+   [:form {:ng-controller "LoginCtrl"
+           :ng-submit "submit()"
+           :novalidate true}
+    [:div (label "username" "Username")
+     (text-field {:ng-model "username"} "username")]
+    [:div (label "password" "Password")
+     (password-field {:ng-model "password"} "password")]      
+    (submit-button "Login")]]
+  ;TODO: should have a modal-footer with submit, but then no form?
+  ])
+
+(def header
+  [:header.navbar.navbar-fixed-top {:ng-controller "TopCtrl"}
+   [:div.navbar-inner
+    [:a.brand {:href "/#/"}
+     [:img {:src "/img/favicon.ico" :width "20" :height "20"}]
+     [:strong "oneup"]]
+    [:ul.nav
+     [:li.divider-vertical]
+     [:li (link-to "/#/about" "About")]
+     [:li.divider-vertical]
+     [:li (link-to "/#/leaderboard" "Leaderboard")]
+     [:li.divider-vertical]
+     [:li (link-to "/#/harbor" "Harbor")]
+     [:li.divider-vertical]]
+    [:div.login.ng-cloak.pull-right {:ng-show "!user.username"}
+     (submit-button {:ng-click "login()"} "Login")]
+    [:div.logout.ng-cloak.pull-right {:ng-show "user.username"}
+     [:span "{{user.username}}"]
+     (submit-button {:ng-click "logout()"} "logout")]]])
+
+(defpage "/" []
+         (html5
+            [:head
+             [:title "oneup"]
+             [:meta {:name "viewport"
+                     :content "width=device-width"
+                     :initial-scale "1.0"}]
+             [:link {:rel "icon"
+                     :href "/img/favicon.ico"
+                     :type "image/x-icon"}]
+             [:link {:rel "shortcut"
+                     :href "/img/favicon.ico"
+                     :type "image/x-icon"}]
+             (include-css "/css/bootstrap.min.css")
+             (include-css "/css/oneup.css")
+             (include-css "/css/bootstrap-responsive.min.css")]
+             [:body {:authenticate "login"}
+              header
+              login
+              [:div.ng-view "Loading..."]
+
+              (include-js "/js/jquery-1.8.0.min.js")
+              (include-js "/js/bootstrap.min.js")
+              (include-js "/js/angular-1.0.1.min.js")
+              (include-js "/js/angular-resource-1.0.1.min.js")
+              (include-js "/js/http-auth-interceptor.js")
+              (include-js "/js/services.js")
+              (include-js "/js/controllers.js")
+              (include-js "/js/oneup.js")]))
+
 (defpage "/f" []
-         (layout
+         (html
            "Your name:" [:input {:type "text"
                                  :ng-model "yourname"
                                  :placeholder "World"}]
            [:p "Hello {{yourname || 'World'}}"]
-           [:ul {:ng-controller "ForumController"}
+           [:ul {:ng-controller "ForumCtrl"}
             [:li {:ng-repeat "post in posts"}
              "{{post.date}}{{post.author}}{{post.title}}"]]))
 
@@ -33,20 +105,15 @@
 (defpage "/forum/:id" attrs 
          (json {:attrs attrs}))
 
-(defpage "/" []
-         (layout
-           [:div.ng-view]))
-
 (defpage "/partials/about" []
          (html
            [:p "Yeargh, welcome ye to the Five O Pirates."]
            "Feedback: "
            (mail-to "timothypratley@gmail.com")))
 
-(defn pirate
-  [username]
+(def pirate
   [:div
-    [:h3 "Name: " username]
+    [:h3 "Name: {{pirate.username}}"]
     [:div {:ng-show "pirate"}
       [:p "Joined: {{pirate.joined}}"]
       [:p "Full: {{pirate}}"]]
@@ -55,7 +122,7 @@
 
 (defpage "/partials/harbor" []
          (html
-           (pirate (session/get :username))
+           pirate
            (link-to "#/plunder" "Plunder!")))
 
 (def gold-field
@@ -73,7 +140,7 @@
      [:span.error {:ng-show "f.g.$error.required"} "Required"]]])
 
 (defpage "/partials/pirate" []
-         (html (pirate "{{username}}")))
+         (html pirate))
 
 (defpage "/partials/propose" []
          (html
@@ -109,9 +176,6 @@
   (html
     [:h3 "Leaderboard"]
     [:table
-     [:tr {:ng-repeat "leader in leaders"}
-      [:td "{{leader.username}}"]
-      [:td "{{leader.gold}}"]
-      [:td "{{leader.deaths}}"]
-      [:td "{{leader.accepted}}"]]]))
+     [:tr {:ng-repeat "pirate in leaderboard"}
+      [:td {:ng-repeat "col in pirate"} "{{col}}"]]]))
 

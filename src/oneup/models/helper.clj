@@ -10,8 +10,8 @@
            (assoc entity to value))
     :setf (let [to (pattern 1)
                 f (pattern 2)]
-            (apply assoc-in entity [to]
-                   (f (map event (drop 3 pattern)))))
+            (assoc entity to
+                   (apply f (map event (drop 3 pattern)))))
     :copy (let [from (pattern 1)
                 to (get pattern 2 from)]
             (println "ENTITY " entity)
