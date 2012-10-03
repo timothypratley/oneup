@@ -12,7 +12,7 @@
 (defn score
   "Calculate the score for a user"
   [username]
-  (get @user-summaries username :gold 0))
+  (get-in @user-summaries [username :gold] 0))
 
 ;TODO: choose a better datastructure
 ; a sorted set of pairs?
