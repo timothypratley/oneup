@@ -118,43 +118,23 @@
            reconcile vote
            [:copy :username]
            [:copy :vote]))
-  (defmethod accept :proposal-accepted
-    [domain closed]
-    ;TODO: something?
-    )
-  (defmethod accept :proposal-rejected
-    [domain closed]
-    ;TODO: something?
-    )
 
   ;public
   (defn add-vote-command
     "Add a vote"
     [username leader size rank vote]
-    (if-let [p (proposal leader size)]
+    (let [p (proposal leader size)]
       (cond
         (not (user username)) (str "no such user " username)
         (not (user leader)) (str "no such leader " leader)
         (not (<= min-proposal rank size max-proposal)) "not a valid rank"
+        (nil? p) "no such proposal"
         (get-in p [size rank]) "rank already voted"
         (= username leader) "cannot vote on your own proposal"
-        :else (do
-                (println "DEBUG " p)
-                (raise {:type :vote-added
-                        :username username
-                        :leader leader
-                        :size size
-                        :rank rank
-                        :vote vote})
-                ;TODO: preserve the return value
-                (cond (= (- size 2) (count (p :vote)))
-                      (raise {:type :proposal-accepted
-                              :leader leader
-                              :size size})
-                      ;TODO: count true and false
-                      (= (- size 2) (count (p :vote)))
-                      (raise {:type :proposal-rejected
-                              :leader leader
-                              :size size}))))
-      "no such proposal")))
+        :else (raise {:type :vote-added
+                      :username username
+                      :leader leader
+                      :size size
+                      :rank rank
+                      :vote vote})))))
 

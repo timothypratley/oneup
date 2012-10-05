@@ -24,6 +24,7 @@
          (testing "When adding a vote"
                   (println "ADDING "
                            (add-user-command "blackbeard" "foo"))
+                  (is (:password (user "blackbeard") "foo"))
                   (println "VOTING "
                            (add-vote-command "blackbeard" "redbeard" 5 3 true))
                   (is (get-vote "redbeard" 5 3) true)))
