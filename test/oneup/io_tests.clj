@@ -10,7 +10,7 @@
                password "barnacle"]
            (add-user-command username password)
            (is (:password (user username) password))
-           (is (:joined (@user-summaries username)))))
+           (is (:joined (@users username)))))
 
 (deftest test-hydrate
          (read-events hydrate))

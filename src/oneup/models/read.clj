@@ -3,16 +3,16 @@
 
 ;TODO why use ref here but agent for domain?
 (def leaderboard (ref []))
-(def user-summaries (ref {}))
+(def users (ref {}))
 (def proposal-statistics (ref {}))
 
-(def update-user (partial alter user-summaries update-in))
+(def update-user (partial alter users update-in))
 (def ninc (fnil inc 0))
 
 (defn score
   "Calculate the score for a user"
   [username]
-  (get-in @user-summaries [username :gold] 0))
+  (get-in @users [username :gold] 0))
 
 (defn swapv [v i1 i2] 
    (assoc v i2 (v i1) i1 (v i2)))
@@ -21,87 +21,91 @@
   [username]
   (dosync
     ;start at the current rank
-    (let [rank (atom (get-in @user-summaries [username :rank]))
+    (let [rank (atom (get-in @users [username :rank]))
           new-score (score username)]
       ;calc the new score and save it to user
-      (alter user-summaries assoc-in [username :score] new-score)
+      (alter users assoc-in [username :score] new-score)
       ;swap ranks upward, updating the swappie as we go
-      (println "DEBUG " username " : " (@user-summaries username))
-      (println "DEBUG leaderboard: " @leaderboard)
-      (println "DEBUG rank: " @rank)
+      #_(println "DEBUG " username " : " (@users username))
+      #_(println "DEBUG leaderboard: " @leaderboard)
+      #_(println "DEBUG rank: " @rank)
       (while (and (pos? @rank)
-                  (< ((@user-summaries (@leaderboard (dec @rank))) :score) new-score))
+                  (< ((@users (@leaderboard (dec @rank))) :score) new-score))
         (alter leaderboard swapv @rank (dec @rank))
-        (alter user-summaries assoc-in [(@leaderboard @rank) :rank] @rank)
+        (alter users assoc-in [(@leaderboard @rank) :rank] @rank)
         (swap! rank dec))
       ;or swap ranks downward
       (while (and (< @rank (dec (count @leaderboard)))
-                  (> ((@user-summaries (leaderboard (inc @rank))) :score) new-score))
+                  (> ((@users (leaderboard (inc @rank))) :score) new-score))
         (alter leaderboard swapv @rank (inc @rank))
-        (alter user-summaries assoc-in [(@leaderboard @rank) :rank] @rank)
+        (alter users assoc-in [(@leaderboard @rank) :rank] @rank)
         (swap! rank inc))
       ;until we reach the right rank, and save the new rank
-      (alter user-summaries assoc-in [username :rank] @rank))))
+      (alter users assoc-in [username :rank] @rank))))
 
 (defmulti denormalize :type)
 
 (defmethod denormalize :proposal-added [proposal]
-  (println proposal)
   (dosync
     (let [leader (proposal :username)
           nils (repeat (dec (count (proposal :gold))) nil)
           make-vec #(vec (cons % nils))]
       (alter proposal-statistics
              update-in [(proposal :gold)] ninc)
-      (alter user-summaries
+      (alter users
              update-in [leader]
              reconcile proposal
              [:update :proposed-count ninc]
              [:update :proposal-history conj :gold])
-      (alter user-summaries
+      (alter users
              update-in [leader :proposal :size]
              reconcile proposal
              [:copy :gold]
+             ;TODO: vectors are not created...
              [:setf :users make-vec :username]
              [:setf :voted make-vec :when]
              [:set :vote (make-vec true)])
       (update-leaderboard leader))))
 
-(defmethod denormalize :vote-added
-  [vote]
-  (dosync
-    (alter user-summaries
-           update-in [(:username vote)]
-           reconcile vote
-           [:update :vote-count ninc])
-    (println "VOTE-ADDED " vote)
-    (alter user-summaries
-           update-in [(vote :leader) :proposal (vote :size)]
-           reconcile vote
-           [:update :users assoc :rank :username]
-           [:update :voted assoc :rank :when]
-           [:update :vote assoc :rank :vote])
-    (update-leaderboard (vote :username))
-    (update-leaderboard (vote :leader))))
-
-(defmethod denormalize :proposal-accepted [proposal]
-  (dosync
-    (update-user [(first (proposal :users)) :success-count] ninc)
+(defn proposal-accepted [leader proposal]
+    (update-user [leader :success-count] ninc)
     (doseq [ii (range (count (proposal :users)))]
       (let [username ((proposal :users) ii)
             gold ((proposal :gold) ii)]
         (update-user [username :gold] + gold)
         (update-user [username :plunder-count] ninc)
-        (update-leaderboard username)))))
+        (update-leaderboard username))))
 
-
-(defmethod denormalize :proposal-rejected [proposal]
-  (dosync
-    (update-user [(first (proposal :users)) :failure-count] ninc)
+(defn proposal-rejected [leader proposal]
+    (update-user [leader :failure-count] ninc)
     (doseq [ii (range (count (proposal :users)))]
       (let [username ((proposal :users) ii)]
         (update-user [username :mutiny-count] ninc)
-        (update-leaderboard username)))))
+        (update-leaderboard username))))
+
+(defn check-votes [leader size]
+  (let [p (get-in @users [leader :proposal size])]
+    (if (= (count (remove nil? (p :vote))) size)
+      (if (>= (count (filter true? (p :vote))) (/ size 2))
+        (proposal-accepted leader p)
+        (proposal-rejected leader p)))))
+
+(defmethod denormalize :vote-added
+  [vote]
+  (dosync
+    (alter users
+           update-in [(:username vote)]
+           reconcile vote
+           [:update :vote-count ninc])
+    (alter users
+           update-in [(vote :leader) :proposal (vote :size)]
+           reconcile vote
+           [:update :users assoc :rank :username]
+           [:update :voted assoc :rank :when]
+           [:update :vote assoc :rank :vote])
+    (check-votes (vote :leader) (vote :size))
+    (update-leaderboard (vote :username))
+    (update-leaderboard (vote :leader))))
 
 (defmethod denormalize :user-added [user]
   (dosync

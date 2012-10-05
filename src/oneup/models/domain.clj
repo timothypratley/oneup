@@ -1,34 +1,31 @@
 (ns oneup.models.domain
-  (:use [oneup.models.helper]))
-
-(def max-size 5)
-(def min-size 2)
-(def booty 10)
+  (:use [clojure.string :only [blank?]]
+        [oneup.models.helper]))
 
 (let [domain (agent {:user {}})
       publish (ref (fn [event]))
-      store (ref (fn [event]))]
+      store (ref (fn [event]))
+      max-proposal 5
+      min-proposal 2
+      booty 10]
 
   (defmulti accept
     "Updates the domain model according to the event that occured.
      This should only be called from raise."
     (fn [domain event] (event :type)))
 
-  ;public
   (defn publisher
     "Sets the function that will publish events"
     [f]
     (dosync
       (ref-set publish f)))
   
-  ;public
   (defn storer
     "Sets the function that will store events"
     [f]
     (dosync
       (ref-set store f)))
 
-  ;public
   (defn raise
     "Accepts the event to the domain model.
      The only updates to the domain model are done through raising events.
@@ -76,8 +73,8 @@
     "Add a user"
     [username password]
     (cond
-      (nil? username) "must supply a username"
-      (nil? password) "must supply a password"
+      (blank? username) "must supply a username"
+      (blank? password) "must supply a password"
       (user username) "user already exists"
       :else (raise {:type :user-added
                     :username username
@@ -95,7 +92,7 @@
     (dissoc domain
             :user (proposal :leader) :proposal (proposal :size)))
 
-  (defn gold? [g]
+  (defn- gold? [g]
     (and (integer? g) (<= 0 g booty)))
 
   ;public
@@ -106,7 +103,7 @@
       ;TODO: make an error accumulator
       (cond
         (not (user username)) (str "no such user " username)
-        (not (<= min-size size max-size)) (str "an array of " min-size " to " max-size " integers")
+        (not (<= min-proposal size max-proposal)) (str "an array of " min-proposal " to " max-proposal " integers")
         (not (every? gold? gold)) (str "integers must be from 0 to " booty)
         (not (= booty (reduce + gold))) (str "must sum to " booty)
         (proposal username size) (str "already have an active proposal for " size)
@@ -126,23 +123,18 @@
   (defn add-vote-command
     "Add a vote"
     [username leader size rank vote]
-    (if-let [p (proposal leader size)]
+    (let [p (proposal leader size)]
       (cond
         (not (user username)) (str "no such user " username)
         (not (user leader)) (str "no such leader " leader)
-        (not (<= min-size rank size max-size)) "not a valid rank"
+        (not (<= min-proposal rank size max-proposal)) "not a valid rank"
+        (nil? p) "no such proposal"
         (get-in p [size rank]) "rank already voted"
         (= username leader) "cannot vote on your own proposal"
-        :else (do
-                (raise {:type :vote-added
-                        :username username
-                        :leader leader
-                        :size size
-                        :rank rank
-                        :vote vote})
-                (when (= (- size 2) (count (p :vote)) 
-                  (raise {:type :proposal-closed
-                          :leader leader
-                          :size size})))))
-      "no such proposal")))
+        :else (raise {:type :vote-added
+                      :username username
+                      :leader leader
+                      :size size
+                      :rank rank
+                      :vote vote})))))
 
