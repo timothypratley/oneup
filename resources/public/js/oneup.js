@@ -3,8 +3,6 @@ angular.module('oneup', ['http-auth-interceptor'])
       $routeProvider
           .when("/about", {templateUrl: "partials/about",
                            controller: AboutCtrl})
-          .when("/login", {templateUrl: "partials/login",
-                           controller: LoginCtrl})
           .when("/propose/:size", {templateUrl: "partials/propose",
                                    controller: ProposeCtrl})
           .when("/pirate/:name", {templateUrl: "partials/pirate",

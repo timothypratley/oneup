@@ -10,9 +10,9 @@
       store (ref (fn [event]))]
 
   (defmulti accept
-  "Updates the domain model according to the event that occured.
-   This should only be called from raise."
-  (fn [domain event] (event :type)))
+    "Updates the domain model according to the event that occured.
+     This should only be called from raise."
+    (fn [domain event] (event :type)))
 
   ;public
   (defn publisher

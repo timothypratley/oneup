@@ -1,3 +1,19 @@
+
+function LoginCtrl($scope, $http, $log, $location, authService) {
+    $scope.username = "";
+    $scope.password = "";
+    $scope.login = function (method) {
+        $http.post(method, null,
+            {params: {username: $scope.username,
+                      password: $scope.password}})
+        .success(function (data, status) {
+            authService.loginConfirmed();
+            $rootScope.username = $scope.username;
+        })
+        .error($log.error);
+    }
+}
+
 function ForumCtrl($scope, $http) {
     $http.get("forum")
     .success(function (data) {
@@ -61,20 +77,6 @@ function VoteCtrl($scope, $http, $log, $location) {
         .success($log.info)
         .error($log.error);
         $location.path("/harbor");
-    }
-}
-
-function LoginCtrl($scope, $http, $log, $location, authService) {
-    $scope.username = "";
-    $scope.password = "";
-    $scope.submit = function () {
-        // capture the current username
-        var username = $scope.username;
-        $http.post("/login", null,
-            {params: {username: username,
-                      password: $scope.password}})
-        .success(authService.loginConfirmed)
-        .error($log.error);
     }
 }
 

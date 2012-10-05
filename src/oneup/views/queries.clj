@@ -32,9 +32,10 @@
 
 (defpage [:post "/login"] {:keys [username password]}
          (println "login" username)
-         (if (= password (get-in @user-summaries [username :password]))
-           (response/json (session/put! :username username))
-           (response/status 401 "Login failed")))
+         (if-let [user (@user-summaries username)]
+           (if (= password (user :password))
+             (response/json (session/put! :username username))))
+         (response/status 401 "Login failed"))
 
 (defpage [:post "/logout" :get "/logout"] []
          (println "logout")

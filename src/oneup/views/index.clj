@@ -10,26 +10,26 @@
         [hiccup.page-helpers]))
 
 (def login
-  [:div#login.modal.hide.fade {:tabindex -1
-                              :role "dialog"
-                              :aria-labelledby "Login"
-                              :aria-hidden "true"}
-  [:div.modal-header
-   "Login to Oneup"
-   [:button.close {:type "button"
-                   :data-dismiss "modal"
-                   :aria-hidden "true"} "x"]]
-  [:div.modal-body
-   [:form {:ng-controller "LoginCtrl"
-           :ng-submit "submit()"
-           :novalidate true}
-    [:div (label "username" "Username")
-     (text-field {:ng-model "username"} "username")]
-    [:div (label "password" "Password")
-     (password-field {:ng-model "password"} "password")]      
-    (submit-button "Login")]]
-  ;TODO: should have a modal-footer with submit, but then no form?
-  ])
+  [:div#login.modal.hide {:tabindex -1
+                     :role "dialog"
+                     :aria-labelledby "Login"
+                     :aria-hidden "true"}
+   [:form.modal-form {:ng-controller "LoginCtrl"
+                      :ng-submit "login('/login')"
+                      :novalidate true}
+    [:div.modal-header
+     [:a.close {:type "button"
+                :data-dismiss "modal"
+                :aria-hidden "true"} "x"]
+     [:h3 "Who goes there..."]]
+    [:div.modal-body
+     [:div (label "username" "What be yer name?")
+      (text-field {:ng-model "username"} "username")]
+     [:div (label "password" "And plunderin' password?")
+      (password-field {:ng-model "password"} "password")]]
+    [:div.modal-footer
+     [:button.submit.btn {:ng-click "login('/register')"} "Maiden voyage"]
+     [:button.submit.btn.btn-primary "Hoist tha mainsail"]]]])
 
 (def header
   [:header.navbar.navbar-fixed-top {:ng-controller "TopCtrl"}
@@ -46,6 +46,7 @@
      [:li (link-to "/#/harbor" "Harbor")]
      [:li.divider-vertical]]
     [:div.login.ng-cloak.pull-right {:ng-show "!user.username"}
+     (link-to "/#/register" "Register")
      (submit-button {:ng-click "login()"} "Login")]
     [:div.logout.ng-cloak.pull-right {:ng-show "user.username"}
      [:span "{{user.username}}"]
@@ -161,16 +162,6 @@
            [:form.css-form {:novalidate true}
             (submit-button {:ng-click "submit('yes')"} "Aye!")
             (submit-button {:ng-click "submit('no')"} "Avast!")]))
-
-(defpage "/partials/login" []
-         (html
-           [:form.css-form {:novalidate true
-                            :ng-submit "submit()"}
-            [:div (label "username" "What be yer name?")
-             (text-field {:ng-model "username"} "username")]
-            [:div (label "password" "And plunderin' password?")
-             (password-field {:ng-model "password"} "password")]
-            (submit-button "Hoist the mainsail!")]))
 
 (defpage "/partials/leaderboard" []
   (html
