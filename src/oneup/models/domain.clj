@@ -60,7 +60,7 @@
   (defn get-vote
     "Get a vote"
     [leader size rank]
-    (get-in @domain [:user leader :proposal size rank :vote]))
+    (get-in @domain [:user leader :proposal size :votes rank :vote]))
 
   (defmethod accept :user-added
     [domain u]
@@ -73,24 +73,22 @@
     "Add a user"
     [username password]
     (cond
-      (blank? username) "must supply a username"
-      (blank? password) "must supply a password"
-      (user username) "user already exists"
-      :else (raise {:type :user-added
-                    :username username
-                    :password password})))
+      (blank? username)
+        "must supply a username"
+      (blank? password)
+        "must supply a password"
+      (user username)
+        "user already exists"
+      :else
+        (raise {:type :user-added
+                :username username
+                :password password})))
 
   (defmethod accept :proposal-added
     [domain proposal]
-    (update-in domain
-               [:user (proposal :username) :proposal (proposal :size)]
+    (update-in domain [:user (proposal :username) :proposal (proposal :size)]
                reconcile proposal
                [:copy :gold]))
-
-  (defmethod accept :proposal-closed
-    [domain proposal]
-    (dissoc domain
-            :user (proposal :leader) :proposal (proposal :size)))
 
   (defn- gold? [g]
     (and (integer? g) (<= 0 g booty)))
@@ -102,22 +100,43 @@
     (let [size (count gold)]
       ;TODO: make an error accumulator
       (cond
-        (not (user username)) (str "no such user " username)
-        (not (<= min-proposal size max-proposal)) (str "an array of " min-proposal " to " max-proposal " integers")
-        (not (every? gold? gold)) (str "integers must be from 0 to " booty)
-        (not (= booty (reduce + gold))) (str "must sum to " booty)
-        (proposal username size) (str "already have an active proposal for " size)
-        :else (raise {:type :proposal-added
-                      :username username
-                      :size size
-                      :gold gold}))))
+        (not (user username))
+          (str "no such user " username)
+        (not (<= min-proposal size max-proposal))
+          (str "an array of " min-proposal " to " max-proposal " integers")
+        (not (every? gold? gold))
+          (str "integers must be from 0 to " booty)
+        (not (= booty (reduce + gold)))
+          (str "must sum to " booty)
+        (proposal username size)
+          (str "already have an active proposal for " size)
+        :else
+          (raise {:type :proposal-added
+                  :username username
+                  :size size
+                  :gold gold}))))
+
+  ; TODO:
+  ; good - no logic in command handler
+  ; bad - duplicating 'reactive events' in domain and read model
+  (defn check-proposal-closed [p vote]
+    (let [size (vote :size)]
+      (if (>= (count (get-in p [size :votes])) (dec size))
+        (dissoc p size)
+        p)))
+
+  (defn update-proposal [p vote]
+    (update-in p [(vote :size) :votes (vote :rank)]
+               reconcile vote
+               [:copy :username]
+               [:copy :vote]))
     
   (defmethod accept :vote-added
     [domain vote]
-    (update-in domain [:user (vote :leader) :proposal (vote :size) (vote :rank)]
-           reconcile vote
-           [:copy :username]
-           [:copy :vote]))
+    (update-in domain [:user (vote :leader) :proposal]
+               #(-> %
+                 (update-proposal vote)
+                 (check-proposal-closed vote))))
 
   ;public
   (defn add-vote-command
@@ -125,16 +144,23 @@
     [username leader size rank vote]
     (let [p (proposal leader size)]
       (cond
-        (not (user username)) (str "no such user " username)
-        (not (user leader)) (str "no such leader " leader)
-        (not (<= min-proposal rank size max-proposal)) "not a valid rank"
-        (nil? p) "no such proposal"
-        (get-in p [size rank]) "rank already voted"
-        (= username leader) "cannot vote on your own proposal"
-        :else (raise {:type :vote-added
-                      :username username
-                      :leader leader
-                      :size size
-                      :rank rank
-                      :vote vote})))))
+        (not (user username))
+          (str "no such user " username)
+        (not (user leader))
+          (str "no such leader " leader)
+        (not (<= min-proposal rank size max-proposal))
+          "not a valid rank"
+        (nil? p)
+          "no such proposal"
+        (get-in p [size rank])
+          "rank already voted"
+        (= username leader)
+          "cannot vote on your own proposal"
+        :else
+          (raise {:type :vote-added
+                  :username username
+                  :leader leader
+                  :size size
+                  :rank rank
+                  :vote vote})))))
 
