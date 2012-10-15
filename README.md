@@ -1,6 +1,6 @@
 # oneup
 
-A website written in noir using AngularJS. 
+Five pirates divide the gold from their plunder
 
 ## Usage
 
@@ -11,7 +11,7 @@ lein run
 
 ## License
 
-Copyright (C) 2011 hitlowman
+Copyright (C) 2012 Timothy Pratley
 
 Distributed under the Eclipse Public License, the same as Clojure.
 

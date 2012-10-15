@@ -119,11 +119,11 @@
   ; TODO:
   ; good - no logic in command handler
   ; bad - duplicating 'reactive events' in domain and read model
-  (defn check-proposal-closed [p vote]
+  (defn check-proposal-closed [ps vote]
     (let [size (vote :size)]
-      (if (>= (count (get-in p [size :votes])) (dec size))
-        (dissoc p size)
-        p)))
+      (if (>= (count (get-in ps [size :votes])) (dec size))
+        (dissoc ps size)
+        ps)))
 
   (defn update-proposal [p vote]
     (update-in p [(vote :size) :votes (vote :rank)]
@@ -152,10 +152,12 @@
           "not a valid rank"
         (nil? p)
           "no such proposal"
-        (get-in p [size rank])
+        (get-in p [rank])
           "rank already voted"
         (= username leader)
           "cannot vote on your own proposal"
+        (some (partial = username) (map :username (vals (p :votes))))
+          "cannot vote as more than one rank"
         :else
           (raise {:type :vote-added
                   :username username

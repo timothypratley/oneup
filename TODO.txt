@@ -1,3 +1,6 @@
 Use angularjs routing and views instead of static pages
 Make another datastore for events
 Separate query server and read servers
+
+Want to add assertions about the datamodel as it is updated
+Debugging both domain and read models is a real pain (mentally)

@@ -22,20 +22,18 @@
   (dosync
     ;start at the current rank
     (let [rank (atom (get-in @users [username :rank]))
-          new-score (score username)]
+          new-score (score username)
+          players (count @leaderboard)]
       ;calc the new score and save it to user
       (alter users assoc-in [username :score] new-score)
       ;swap ranks upward, updating the swappie as we go
-      #_(println "DEBUG " username " : " (@users username))
-      #_(println "DEBUG leaderboard: " @leaderboard)
-      #_(println "DEBUG rank: " @rank)
       (while (and (pos? @rank)
                   (< ((@users (@leaderboard (dec @rank))) :score) new-score))
         (alter leaderboard swapv @rank (dec @rank))
         (alter users assoc-in [(@leaderboard @rank) :rank] @rank)
         (swap! rank dec))
       ;or swap ranks downward
-      (while (and (< @rank (dec (count @leaderboard)))
+      (while (and (< @rank (dec players))
                   (> ((@users (leaderboard (inc @rank))) :score) new-score))
         (alter leaderboard swapv @rank (inc @rank))
         (alter users assoc-in [(@leaderboard @rank) :rank] @rank)
@@ -48,7 +46,8 @@
 (defmethod denormalize :proposal-added [proposal]
   (dosync
     (let [leader (proposal :username)
-          nils (repeat (dec (count (proposal :gold))) nil)
+          size (count (proposal :gold))
+          nils (repeat (dec size) nil)
           make-vec #(vec (cons % nils))]
       (alter proposal-statistics
              update-in [(proposal :gold)] ninc)
@@ -58,10 +57,9 @@
              [:update :proposed-count ninc]
              [:update :proposal-history conj :gold])
       (alter users
-             update-in [leader :proposal :size]
+             update-in [leader :proposal size]
              reconcile proposal
              [:copy :gold]
-             ;TODO: vectors are not created...
              [:setf :users make-vec :username]
              [:setf :voted make-vec :when]
              [:set :vote (make-vec true)])
@@ -72,7 +70,7 @@
     (doseq [ii (range (count (proposal :users)))]
       (let [username ((proposal :users) ii)
             gold ((proposal :gold) ii)]
-        (update-user [username :gold] + gold)
+        (update-user [username :gold] (fnil + 0) gold)
         (update-user [username :plunder-count] ninc)
         (update-leaderboard username))))
 
@@ -85,27 +83,32 @@
 
 (defn check-votes [leader size]
   (let [p (get-in @users [leader :proposal size])]
-    (if (= (count (remove nil? (p :vote))) size)
+    (when (= (count (remove nil? (p :vote))) size)
       (if (>= (count (filter true? (p :vote))) (/ size 2))
         (proposal-accepted leader p)
-        (proposal-rejected leader p)))))
+        (proposal-rejected leader p))
+      (alter users dissoc-in [leader :proposal size]))))
 
 (defmethod denormalize :vote-added
   [vote]
   (dosync
-    (alter users
-           update-in [(:username vote)]
-           reconcile vote
-           [:update :vote-count ninc])
-    (alter users
-           update-in [(vote :leader) :proposal (vote :size)]
-           reconcile vote
-           [:update :users assoc :rank :username]
-           [:update :voted assoc :rank :when]
-           [:update :vote assoc :rank :vote])
-    (check-votes (vote :leader) (vote :size))
-    (update-leaderboard (vote :username))
-    (update-leaderboard (vote :leader))))
+    (let [username (vote :username)
+          leader (vote :leader)
+          size (vote :size)
+          assoc-dec #(assoc %1 (dec %2) %3)]
+      (alter users
+             update-in [username]
+             reconcile vote
+             [:update :vote-count ninc])
+      (alter users
+             update-in [leader :proposal size]
+             reconcile vote
+             [:update :users assoc-dec :rank :username]
+             [:update :voted assoc-dec :rank :when]
+             [:update :vote assoc-dec :rank :vote])
+      (when-not (check-votes leader size)
+        (update-leaderboard username)
+        (update-leaderboard leader)))))
 
 (defmethod denormalize :user-added [user]
   (dosync
