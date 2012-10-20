@@ -9,5 +9,5 @@
                   (is (= (score "blackbeard") 0)))
          (testing "Available proposals"
                   ; TODO:
-                  (is false)
+                  (is false)))
 

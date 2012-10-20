@@ -1,0 +1,5 @@
+{"when":"2012-10-20T01:04:23Z","type":"user-added","username":"redbeard","password":"foo"}
+{"when":"2012-10-20T01:04:23Z","type":"proposal-added","username":"redbeard","size":3,"gold":[4,3,3]}
+{"when":"2012-10-20T01:04:23Z","type":"user-added","username":"blackbeard","password":"foo"}
+{"when":"2012-10-20T01:04:23Z","type":"vote-added","username":"blackbeard","leader":"redbeard","size":3,"rank":3,"vote":true}
+{"when":"2012-10-20T01:04:23Z","type":"user-added","username":"greenbeard","password":"foo"}

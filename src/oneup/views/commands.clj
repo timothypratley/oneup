@@ -10,7 +10,8 @@
 
 ;Start or join a pirate group
 (defpage [:post "/plunder"] []
-         (println "plunder"))
+         (println "plunder")
+         (assign-action (session/get :username)))
 
 ;As leader propose how to divide the gold
 (defpage [:post "/propose/:a/:b/:c/:d/:e"] {:keys [a b c d e]}

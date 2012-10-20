@@ -84,6 +84,35 @@
                 :username username
                 :password password})))
 
+  (defmethod accept :plunder-begins
+    [domain plunder]
+    (update-in domain [:user (plunder :username) :plunder]
+               reconcile plunder
+               [:copy :action]
+               [:copy :size]
+               [:copy :gold]))
+
+  (defn need-proposal
+    []
+    (if (> 5 (count (map :proposal (domain :user))))
+      #_(select a size) 5))
+
+  (defn need-vote
+    []
+    #_(randomly select a proposal, size, rank))
+
+  (defn begin-plunder
+    "Server assigns you to propose a split or vote on one"
+    [username]
+    (if-let [size (need-proposal)]
+      (raise {:type :plunder-begins
+              :action :propose
+              :size size})
+      (raise {:type :plunder-begins
+              :action :vote
+              :gold (need-vote)
+              :rank 2})))
+
   (defmethod accept :proposal-added
     [domain proposal]
     (update-in domain [:user (proposal :username) :proposal (proposal :size)]
